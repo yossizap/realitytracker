@@ -3,7 +3,7 @@ This project provides an easy way to view game recordings created by the reality
 
 It was originally a [C# project](https://www.youtube.com/watch?v=IqPZUMPv2ss&feature=youtu.be&t=447) that automatically uploaded server recordings to youtube but it was decided to make it a portable web application.
 
-# Features
+### Features
 - Recording rewind
 - Recording speed slider
 - Interactive map
@@ -18,10 +18,10 @@ It was originally a [C# project](https://www.youtube.com/watch?v=IqPZUMPv2ss&fea
 - Live kill indication
 - Accessible parse file format - can be used by any application from statistics to displaying the match in a rotating heightmap
 
-# See realitytracker in action
+### See realitytracker in action
 You can play a live match from the project reality tournament [here](https://tournament.realitymod.com/prt_mods/tracker/?demo=files/c13_b9.PRdemo#185). For more you can visit public server's websites or PRT's [replay archive](https://tournament.realitymod.com/showthread.php?p=375923)
 
-# Usage
+### Usage
 - Load one of the example .demo files from `examples/`
 - Click the stack icon on the right to toggle options
 - Click on the running man in the play bar to set the speed
@@ -31,6 +31,6 @@ You can play a live match from the project reality tournament [here](https://tou
 - Squad leaders have a white circle around them
 - Click on the `menus` button to open misc menus
 
-# Tracker JSON format
+### Tracker JSON format
 
-# Repository structure
+### Repository structure
