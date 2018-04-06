@@ -39,7 +39,7 @@ You can play a live match from the project reality tournament [here](https://tou
 - Better documentation
 - Add any data that can be extracted from the game that is useful for the viewer
 
-### Tracker JSON format
+### Tracker protocol
 See [this spreadsheet](https://docs.google.com/spreadsheets/d/1ArciEg1rkG_MHzSYWphje1s071a6kD2ojuD58nVmwAE/edit#gid=0) for the full protocol documentation. The protocol uses a very minimal implementation because the server side code has to run in the game's mainloop and it's intended to work over bad network.
 
 In each configured game tick interval the tracker sends a single packet/writes to the .PRdemo file with different types of updates. The parser parses the headers of each update and then it's content based on the 'message type' opcodes. Each 'message' is internally cached. For example, if the parser finds MESSAGETYPE_PLAYER_UPDATE(0x10) it will start parsing the following strucutre(you can find it in the PLAYER_UPDATE sheet)
