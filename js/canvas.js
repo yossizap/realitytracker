@@ -211,7 +211,7 @@ function drawOrderIcon(order)
 	const y = YtoCanvas(order.Z)
 	
 	//Context.drawImage(icon, order.x, order.y) ////TODO
-	Context.drawImage(icons.CacheRevealed, x-5, y-5, 10, 10) 
+	Context.drawImage(icons.CacheRevealed, x-6, y-6, 12, 12) 
 	
 	
 	Context.fillStyle = (order.team == 1) ? Style_RedTeam : Style_BlueTeam

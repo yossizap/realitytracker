@@ -7,8 +7,16 @@ $(() => $("#selection").dialog(
 	height: "auto",
 	resizable: false,
 	title: "Selection",
-	position: { at: "right" }
+	position: { at: "right" },
 }))
+
+$(() => {
+	$("#selection")[0].onclick = () =>
+	{
+		selection_onClick()
+	}
+	$("#selection")[0].style.cursor = "pointer"
+})
 
 
 const SELECTED_NOTHING = -99999
@@ -59,7 +67,7 @@ function selection_SelectPlayer(i, allowHighlight)
 		
 		//highlight player
 		if (!selectingSamePlayer && allowHighlight && p.X && p.Z)
-			new highlight(p.X, p.Z)
+			highlight(p.X, p.Z)
 		
 		playerRows[i].classList.add("player-row-selected") //set row to selected
 		SelectedPlayer = i
@@ -74,6 +82,20 @@ function selection_SelectPlayer(i, allowHighlight)
 	redrawIfNotPlaying()
 }
 
+
+function selection_onClick()
+{
+	if (SelectedVehicle != SELECTED_NOTHING)
+	{
+		const veh = AllVehicles[SelectedVehicle]
+		highlight(veh.X, veh.Z)
+	}
+	else if (SelectedPlayer != SELECTED_NOTHING)
+	{
+		const p = AllPlayers[SelectedPlayer]
+		highlight(p.X, p.Z)
+	}
+}
 
 // When clicking on a vehicle, for this release just select a passenger
 function selection_SelectVehicle(i)
@@ -146,7 +168,9 @@ function selection_UpdateInformationBox()
 {
 	const div = $("#selection")[0]
 	div.innerHTML = ""
-
+	div.classList.remove("color_Team1")
+	div.classList.remove("color_Team2")
+	
 	// Vehicle is selected
 	if (SelectedVehicle != SELECTED_NOTHING)
 	{
@@ -178,6 +202,12 @@ function selection_UpdateInformationBox()
 		} 
 		div.innerHTML += "<br>" + escapeHtml(p.name)
 		div.appendChild(icons[p.kitImage].cloneNode(false))
-		div.innerHTML += "<br>Height: " + p.Y
+		div.innerHTML += "<br>Height: " + p.Y	
+		
+		
+		if (p.team == 1)
+			div.classList.add("color_Team1")
+		else	
+			div.classList.add("color_Team2")
 	}
 }

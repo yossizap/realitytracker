@@ -129,7 +129,7 @@ $(() =>
 	new eventDialog({
 		name: 'kills',
 		height: 230,
-		width: 580,
+		width: 610,
 		minHeight: 60,
 		minWidth: 200,
 		title: "Kill Feed (X)",
@@ -143,7 +143,7 @@ $(() =>
 	new eventDialog({
 		name: 'chat',
 		height: 400,
-		width: 500,
+		width: 550,
 		minHeight: 60,
 		minWidth: 200,
 		title: "Chat (T)",
@@ -157,7 +157,7 @@ $(() =>
 	new eventDialog({
 		name: 'revives',
 		height: 200,
-		width: 330,
+		width: 350,
 		minHeight: 80,
 		minWidth: 300,
 		title: "Revives (R)",
@@ -183,7 +183,7 @@ $(() =>
 	new eventDialog({
 		name: 'vehicleDestroyers',
 		height: 300,
-		width: 450,
+		width: 470,
 		minHeight: 80,
 		minWidth: 300,
 		title: "Vehicles Destroyed (D)",
@@ -195,6 +195,14 @@ $(() =>
 })
 
 
+
+function setCellTeamColor(rowObject, cellIndex, team)
+{
+	if (team == 1)
+		rowObject.cells[cellIndex].className = "color_Team1"
+	else
+		rowObject.cells[cellIndex].className = "color_Team2"
+}
 
 //Special row making functions
 
@@ -209,7 +217,7 @@ function insertTimeCellAtIndex(row,index,obj,dialog)
 		dialog.lockScrollElement.checked = false;
 		goTo(obj.tick - 1)
 		if (obj.X && obj.Y)
-			new highlight(obj.X,obj.Y)
+			highlight(obj.X,obj.Y)
 	}
 	
 	row.cells[index].style.cursor = "pointer"
@@ -218,14 +226,12 @@ function insertTimeCellAtIndex(row,index,obj,dialog)
 function insertNameCellAtIndex(row,index,obj,name,playerID,team)
 {
 	row.insertCell(index).textContent = name
-	//Add team color
-	if (team == 1)
-		row.cells[index].className = "color_Team1"
-	else
-		row.cells[index].className = "color_Team2"
+	setCellTeamColor(row, index, team)
 	
 	//add click event
 	addPlayerSelectFunctionToCell(row.cells[index],name,playerID)
+	
+	//TODO error message if that player does not exist at that time (Left or didnt join yet) when selecting
 }
 
 function addPlayerSelectFunctionToCell(cell, name, playerID)
@@ -251,7 +257,7 @@ function vdestroy_makeRow(obj,row)
 	
 	
 	row.insertCell(2).textContent = name
-	
+	setCellTeamColor(row, 2, obj.vehicleTeam)	
 }
 
 function kit_makeRow(obj,row)
@@ -347,8 +353,6 @@ function kf_makeRow(kill, row)
 	
 	row.onmouseenter = () => kf_select(kill.index)
 	row.onmouseleave = () => kf_select(SELECTED_NOTHING)
-	
-	//TODO error message if that player does not exist at that time (Left or didnt join yet) when selecting
 }
 
 

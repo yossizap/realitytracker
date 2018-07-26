@@ -6,7 +6,13 @@ const fadePerMillisecond = 0.002
 
 $(()=> redrawNeededChecks.push(highlightExists))
 
+
 function highlight(x,z)
+{
+	new _highlight(x,z)
+}
+
+function _highlight(x,z)
 {
 	this.x = x
 	this.z = z
