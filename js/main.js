@@ -138,7 +138,7 @@ function updatePlayBar()
 
 function toggleSubMenu(submenu)
 {
-	var menu = $("#" + submenu)
+	const menu = $("#" + submenu + "Container")
 	if (menu.dialog("isOpen"))
 		menu.dialog("close");
 	else
@@ -179,25 +179,25 @@ function onKeyDown(e)
 			toggleSubMenu("serverinfo")
 			break;
 		case 90: //z
-			toggleSubMenu("scoreBoardContainer")
+			toggleSubMenu("scoreBoard")
 			break
 		case 88:  //x
-			toggleSubMenu("killsContainer")
+			toggleSubMenu("kills")
 			break
 		case 67: //c
-			toggleSubMenu("vehiclesContainer")
+			toggleSubMenu("vehicles")
 			break
 		case 84: //t
-			toggleSubMenu("chatContainer")
+			toggleSubMenu("chat")
 			break
 		case 82: //r
-			toggleSubMenu("revivesContainer")
+			toggleSubMenu("revives")
 			break
 		case 75: //k
-			toggleSubMenu("kitAllocationsContainer")
+			toggleSubMenu("kitAllocations")
 			break
 		case 68: //d
-			toggleSubMenu("vehicleDestroyersContainer")
+			toggleSubMenu("vehicleDestroyers")
 			break
 		case 37: // left
 			if (e.shiftKey)
@@ -215,8 +215,10 @@ function onKeyDown(e)
 		default:
 			return;
 		}
-
-	e.preventDefault(); // prevent the default action
+	
+	// prevent the default action (unless its i which opens console and its annoying to override it)
+	if (e.which != 73)
+		e.preventDefault(); 
 }
 
 function onKeyUp(e)
