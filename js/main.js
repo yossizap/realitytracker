@@ -245,6 +245,8 @@ function updateHeader()
 
 function getTimeStringOfTick(tick)
 {
+	if (tick >= tickToTime.length) tick = tickToTime.length - 1
+	
 	const time = roundLength + briefingtime - tickToTime[tick]
 	return getTimeString(time)
 }

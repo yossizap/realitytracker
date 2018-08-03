@@ -181,12 +181,12 @@ const orderEnums = [null,
 	null,
 	null,
 	null,
-	["moveorder", "#cbc337"], // move
-	["attackorder", "#ff9900"], // target
-	["defendorder", "#ca32f2"], // defend
-	["buildorder", "#ca32f2"], // build
-	["destroyorder", "#ff9900"], // destroy
-	["observeorder", "#ff9900"]  // observe
+	[0, "#cbc337"], // move
+	[33, "#ff9900"], // target
+	[66, "#ca32f2"], // defend
+	[99, "#ca32f2"], // build
+	[132, "#ff9900"], // destroy
+	[165, "#ff9900"]  // observe
 ]
 
 
@@ -206,13 +206,12 @@ function drawOrderIcon(order)
 	if (e == null)
 		return
 	
-	const icon = e[0]
+	const iconX = e[0]
 	const x = XtoCanvas(order.X)
 	const y = YtoCanvas(order.Z)
 	
-	//Context.drawImage(icon, order.x, order.y) ////TODO
-	Context.drawImage(icons.CacheRevealed, x-6, y-6, 12, 12) 
-	
+	Context.drawImage(icons.squadorders, iconX, 12, 20, 32, x - 16, y - 14, 20, 32) 
+
 	
 	Context.fillStyle = (order.team == 1) ? Style_RedTeam : Style_BlueTeam
 	Context.fillText(order.squad, x + 5, y - 5)
