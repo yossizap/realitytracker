@@ -271,7 +271,8 @@ var isParsingDone=false
 var isMapDownloadingDone = false
 
 // Temp workaround until v4. I want to get rid of that mapdata.json completely for now.
-const mapSizeDict ={
+const mapSizeDict = {
+	"operation_falcon": 2,
 	"tad_sae": 1,
 	"operation_ghost_train": 1,
 	"sahel": 2,
