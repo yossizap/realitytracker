@@ -344,11 +344,13 @@ function stage3LoadingFininshed()
 	if (!isNetworking) //should be already available if we're networking and reached this function
 		ReadServerDetails()
 	
-	if (MapName in mapSizeDict)
-		MapSize = mapSizeDict[MapName]
-	else
-		//TODO ugly prompt for custom maps, remove in V4
-		MapSize = prompt("Map unknown, please enter map size (0.5,1,2,4,8)")
+	if (MapSize == 0)
+	{
+		if (MapName in mapSizeDict)
+			MapSize = mapSizeDict[MapName]
+		else
+			MapSize = prompt("Map unknown, please enter map size (0.5,1,2,4,8)")
+	}
 	
 	//Load this map's image
 	MapImage = new Image()

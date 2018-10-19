@@ -55,7 +55,7 @@ var CameraY = 0
 var CameraZoom = 1
 var MapImageDrawSize = 1024 //this helper value is ALWAYS CameraZoom * 1024
 // Map size in km
-var MapSize = 2
+var MapSize = 0
 
 // Scale from game X/Y to canvas coordinates
 function XtoCanvas(x)

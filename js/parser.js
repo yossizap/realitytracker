@@ -1168,6 +1168,18 @@ function ServerDetails(FullMessage)
 
 	tickets2 = FullMessage.getInt16(pos, true)
 	pos += 2
+	
+	
+	//Version Oct 2018 - added mapsize in file
+	if (pos == FullMessage.byteLength)
+		return
+		
+	MapSize = FullMessage.getFloat32(pos, true)
+	if (MapSize == 0) MapSize = 2
+	MapSize = clamp(0.25, MapSize, 128)
+	pos += 4
+	
+	
 }
 
 // DO NOT CALL AFTER INIT
