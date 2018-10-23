@@ -980,17 +980,12 @@ var InitialParse = true
 // Call this to advance time by one tick 
 function Update()
 {
-	// If not in counting phase and current tick is at the end and is not in network mode then stop
+	// If not in counting phase and current tick is at the end then stop
 	if (Tick_Count == Tick_Current && !InitialParse)
 	{
-		if (isNetworking)
-			return false
-		else
-		{
-			Stop()
-			Tick_Current = Tick_Count
-			return false
-		}
+		Stop()
+		Tick_Current = Tick_Count
+		return false
 	}
 
 	// Interpolation
@@ -1039,7 +1034,7 @@ function Update()
 
 
 	// If we're doing initial parse or if this is live demo, save states.
-	if (InitialParse || isNetworking)
+	if (InitialParse)
 	// Save once per X ticks, don't save if already exists, don't save for tick = 0
 		if (Tick_Current % TICKSPERSAVE == 0 && !(Tick_Current in savedStates) && Tick_Current != 0)
 			saveState()
@@ -1534,19 +1529,9 @@ function messageArray()
 
 	this.getNextMessage = function ()
 	{
-		var databuffer
-		var endOfBuffer
-		if (isNetworking)
-		{
-			databuffer = network_Buffer
-			endOfBuffer = network_BufferWritePos
-		}
-		else
-		{
-			databuffer = DataBuffer
-			endOfBuffer = DataBuffer.byteLength
-		}
-
+		var databuffer = DataBuffer
+		var endOfBuffer = DataBuffer.byteLength
+		
 		// Enough bytes for length?
 		if (this.pos + 2 > endOfBuffer)
 			return null // End of file reached
@@ -1575,6 +1560,15 @@ function messageArray()
 		{
 			this.addMessage(message)
 			message = this.getNextMessage()
+		}
+		
+		// If last message isn't ROUNDEND type, its probably a server crash, last message is likely corrupted. remove it.
+		message = this.messages[this.messages.length - 1]
+		const messageType = message.getUint8(0);
+		if (messageType != MESSAGETYPE.ROUNDEND)
+		{
+			console.log("Unexpected file end. Removing last message as it may be incomplete")
+			this.messages.pop()
 		}
 	}
 

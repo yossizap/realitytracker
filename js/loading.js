@@ -183,7 +183,7 @@ function loadLiveDemo(IP,Port,Username,Password)
 		return false
 	}
 	
-	network_connect(IP,Port,Username,Password,stage3LoadingFininshed, () => {}); //TODO some onerror callback
+	//network_connect(IP,Port,Username,Password,stage3LoadingFininshed, () => {}); //TODO some onerror callback
 	//Wait for callback from onConnect and go to stage3 finished
 }
 
@@ -341,8 +341,7 @@ function stage3LoadingFininshed()
 	
 	
 	//Read up to server details message, update things like map name, layer, gamemode, team names.
-	if (!isNetworking) //should be already available if we're networking and reached this function
-		ReadServerDetails()
+	ReadServerDetails()
 	
 	if (MapSize == 0)
 	{
@@ -371,10 +370,8 @@ function stage3LoadingFininshed()
 	neutralflag = icons["neutral_cp"]
 	
 	// Parse the file and create checkpoints (while the map downloads!)
-	if (!isNetworking)
-		ParseDemo_Start()
-	else
-		ParseDemo_End() //Skip demo parsing for network mode
+	ParseDemo_Start()
+
 }
 
 
