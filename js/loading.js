@@ -496,7 +496,7 @@ function showInterface()
 function updateLoadingStatus()
 {
 	const T1 = MapImage.completedPercentage == 100 ? "Done" : MapImage.completedPercentage + "%"
-	const T2 = isParsingDone || isNetworking ? "Done" : Tick_Count
+	const T2 = isParsingDone ? "Done" : Tick_Count
 	setLoadingOverlayText("Loading map image and Parsing demo.<br> Map download: " + T1 + "<br>Ticks Parsed: "+T2)
 }
 
