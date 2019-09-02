@@ -1321,6 +1321,8 @@ $(() =>
 			const x2 = VictimObj.X
 			const y1 = AttackerObj.Z
 			const y2 = VictimObj.Z
+			const z1 = AttackerObj.Y
+			const z2 = VictimObj.Y
 
 			obj.AttackerX = x1
 			obj.VictimX = x2
@@ -1329,7 +1331,7 @@ $(() =>
 			obj.VictimY = y2
 			obj.Y = y2
 
-			obj.Distance = Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)))
+			obj.Distance = Math.round(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) + Math.pow(z2 - z1, 2)))
 			obj.isTeamkill = AttackerObj.team == VictimObj.team
 		}
 			
