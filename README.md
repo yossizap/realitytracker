@@ -1,3 +1,6 @@
+[Click for Example](https://yossizap.github.io/realitytracker/?demo=examples/tracker_2018_04_05_20_49_09_black_gold_gpm_cq_64.PRdemo)
+
+
 # Reality Tracker
 This project provides an easy way to view game recordings created by the realitytracker.py script. The goal is to provide as much data as possible to analyse matches for learning and administration without launching the game to use DICE's Battlerecoder.
 
