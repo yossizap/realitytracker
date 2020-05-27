@@ -193,6 +193,11 @@ function loadDemo(link, CredsNeeded)
 	if (link == "")
 		return false
 	
+	//Guarantee that link will use the same protocol as the window
+	var url = new URL(link);
+	url.protocol = window.location.protocol;
+	link = url.href;
+	
 	//Manually set query string when loading from a URL
 	if (history.pushState) 
 	{
