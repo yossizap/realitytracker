@@ -71,6 +71,8 @@ const MESSAGETYPE = {
 	
 	MARKER_ADD: 0x80,
 	MARKER_REMOVE: 0x81,
+	MINE_ADD: 0x82,
+	MINE_REMOVE: 0x83,
 	
 	REVIVE: 0xA0,
 	KITALLOCATED: 0xA1,
@@ -767,6 +769,38 @@ function CacheDestroyed(FullMessage)
 	}
 }
 
+var AllMines = {}
+function MineObject(id, player, templateName, X, Y, Z)
+{
+	this.id = id
+	this.X = X
+	this.Y = Y
+	this.Z = Z
+	this.templateName = templateName
+	this.player = player
+
+	AllMines[id] = this
+}
+
+function MineAdd(FullMessage)
+{
+	const unpacked = FullMessage.unPack(1, "HBshhh")
+	const parsed = unpacked[1]
+	
+	new MineObject(parsed[0], // index
+					parsed[1], // player
+					parsed[2], // templateName
+					parsed[3], parsed[4], parsed[5]) // xyz
+	
+}
+function MineRemoved(FullMessage)
+{
+	var pos = 1
+	const length = FullMessage.byteLength
+	const id = FullMessage.getUint16(pos,true)
+	delete AllMines[id]
+}
+
 //Insurgency Intel
 var intel = 0
 function intelChanged(FullMessage)
@@ -889,6 +923,8 @@ function loadState(SavedTick)
 	copyList(State.AllFlags, AllFlags)
 	copyList(State.AllCaches, AllCaches)
 	copyList(State.AllSLOrders, AllSLOrders)
+	copyList(State.AllMines, AllMines)
+	
 	SquadNames = JSON.parse(State.SquadNames)
 	
 	
@@ -936,6 +972,7 @@ function saveState()
 	state.AllCaches = copyList(AllCaches)
 	state.AllRallies = copyList(AllRallies)
 	state.AllSLOrders = copyList(AllSLOrders)
+	state.AllMines = copyList(AllMines)
 	
 	for (var handler in eventArrays)
 		eventArrays[handler].saveState(state)
@@ -952,6 +989,7 @@ function Reset()
 	AllRallies = {}
 	AllCaches = {}
 	AllSLOrders = {}
+	AllMines = {}
 	SquadNames = {}
 	
 	
@@ -1709,6 +1747,9 @@ $(() =>
 
 	messageHandlers[MESSAGETYPE.MARKER_ADD] = unknownMessage
 	messageHandlers[MESSAGETYPE.MARKER_REMOVE] = unknownMessage
+	
+	messageHandlers[MESSAGETYPE.MINE_ADD] = MineAdd
+	messageHandlers[MESSAGETYPE.MINE_REMOVE] = MineRemoved
 	
 	messageHandlers[MESSAGETYPE.TICK] = message_Tick
 })
