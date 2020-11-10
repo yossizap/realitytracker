@@ -157,8 +157,8 @@ function drawCanvas()
 	
 	for (var i in AllCaches)
 		drawCache(i)
-	for (var i in AllMines)
-		drawMine(i)
+	for (var i in AllProj)
+		drawProj(i)
 	
 	//Draw selected player above everyone else
 	if (SelectedPlayer != SELECTED_NOTHING)
@@ -693,18 +693,22 @@ function drawCache(i)
 }
 
 
-function drawMine(i)
+function drawProj(i)
 {
-	const mine = AllMines[i]
-	const x = XtoCanvas(mine.X)
-	const y = YtoCanvas(mine.Z)
+	const proj = AllProj[i]
+	
+	const x = XtoCanvas(interpolate(proj.lastX, proj.X))
+	const y = YtoCanvas(interpolate(proj.lastZ, proj.Z))
 	
 	
 	// TODO cba to import skull mark
 	Context.save()
 	
 	Context.lineWidth = 2;
-	Context.strokeStyle = "red"
+	if (proj.team == 1)
+		Context.strokeStyle = Style_RedTeam
+	else
+		Context.strokeStyle = Style_BlueTeam
 	
 	Context.beginPath()
 	Context.moveTo(x-4, y-4)

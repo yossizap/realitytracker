@@ -71,8 +71,10 @@ const MESSAGETYPE = {
 	
 	MARKER_ADD: 0x80,
 	MARKER_REMOVE: 0x81,
-	MINE_ADD: 0x82,
-	MINE_REMOVE: 0x83,
+	
+	PROJ_UPDATE: 0x90,
+	PROJ_ADD: 0x91,
+	PROJ_REMOVE: 0x92,
 	
 	REVIVE: 0xA0,
 	KITALLOCATED: 0xA1,
@@ -769,36 +771,64 @@ function CacheDestroyed(FullMessage)
 	}
 }
 
-var AllMines = {}
-function MineObject(id, player, templateName, X, Y, Z)
+var AllProj = {}
+function ProjObject(id, playerid, type, templateName, yaw, X, Y, Z)
 {
 	this.id = id
 	this.X = X
 	this.Y = Y
 	this.Z = Z
+	this.lastX = X
+	this.lastZ = Z
+	
+	this.yaw = yaw
 	this.templateName = templateName
-	this.player = player
+	this.type = type
+	this.player = AllPlayers[playerid]
+	this.team = this.player.team // so if player disconnects while projectile in air we still have team. player should always exist
 
-	AllMines[id] = this
+	AllProj[id] = this
 }
 
-function MineAdd(FullMessage)
+function ProjUpdate(FullMessage) 
 {
-	const unpacked = FullMessage.unPack(1, "HBshhh")
+	var pos = 1
+	const length = FullMessage.byteLength
+	while (pos != length) 
+	{
+		const unpacked = FullMessage.unPack(pos, "Hhhhh")
+		pos+= unpacked[0]
+		const size = unpacked[0]
+		const parsed = unpacked[1]
+		const id = parsed[0]
+		const proj = AllProj[id]
+		
+		proj.yaw = parsed[1]
+		proj.X = parsed[2]
+		proj.Y = parsed[3]
+		proj.Z = parsed[4]
+	}
+}
+
+function ProjAdd(FullMessage)
+{
+	const unpacked = FullMessage.unPack(1, "HBBshhhh")
 	const parsed = unpacked[1]
 	
-	new MineObject(parsed[0], // index
-					parsed[1], // player
-					parsed[2], // templateName
-					parsed[3], parsed[4], parsed[5]) // xyz
+	new ProjObject(parsed[0], // index
+					parsed[1], // playerid
+					parsed[2], // type
+					parsed[3], // templateName
+					parsed[4], // yaw
+					parsed[5], parsed[6], parsed[7]) // xyz
 	
 }
-function MineRemoved(FullMessage)
+function ProjRemoved(FullMessage)
 {
 	var pos = 1
 	const length = FullMessage.byteLength
 	const id = FullMessage.getUint16(pos,true)
-	delete AllMines[id]
+	delete AllProj[id]
 }
 
 //Insurgency Intel
@@ -923,7 +953,7 @@ function loadState(SavedTick)
 	copyList(State.AllFlags, AllFlags)
 	copyList(State.AllCaches, AllCaches)
 	copyList(State.AllSLOrders, AllSLOrders)
-	copyList(State.AllMines, AllMines)
+	copyList(State.AllProj, AllProj)
 	
 	SquadNames = JSON.parse(State.SquadNames)
 	
@@ -972,7 +1002,7 @@ function saveState()
 	state.AllCaches = copyList(AllCaches)
 	state.AllRallies = copyList(AllRallies)
 	state.AllSLOrders = copyList(AllSLOrders)
-	state.AllMines = copyList(AllMines)
+	state.AllProj = copyList(AllProj)
 	
 	for (var handler in eventArrays)
 		eventArrays[handler].saveState(state)
@@ -989,7 +1019,7 @@ function Reset()
 	AllRallies = {}
 	AllCaches = {}
 	AllSLOrders = {}
-	AllMines = {}
+	AllProj = {}
 	SquadNames = {}
 	
 	
@@ -1040,6 +1070,11 @@ function Update()
 			AllVehicles[i].Lastrotation = AllVehicles[i].rotation
 			AllVehicles[i].lastX = AllVehicles[i].X
 			AllVehicles[i].lastZ = AllVehicles[i].Z
+		}
+		for (var i in AllProj)
+		{
+			AllProj[i].lastX = AllProj[i].X
+			AllProj[i].lastZ = AllProj[i].Z
 		}
 	}
 
@@ -1748,8 +1783,9 @@ $(() =>
 	messageHandlers[MESSAGETYPE.MARKER_ADD] = unknownMessage
 	messageHandlers[MESSAGETYPE.MARKER_REMOVE] = unknownMessage
 	
-	messageHandlers[MESSAGETYPE.MINE_ADD] = MineAdd
-	messageHandlers[MESSAGETYPE.MINE_REMOVE] = MineRemoved
+	messageHandlers[MESSAGETYPE.PROJ_UPDATE] = ProjUpdate
+	messageHandlers[MESSAGETYPE.PROJ_ADD] = ProjAdd
+	messageHandlers[MESSAGETYPE.PROJ_REMOVE] = ProjRemoved
 	
 	messageHandlers[MESSAGETYPE.TICK] = message_Tick
 })
