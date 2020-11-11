@@ -80,9 +80,9 @@ function clampCamera()
 
 
 var doubleClickTimer = null
-const doubleClickTime = 180
+const doubleClickTime = 220
 // Distance from point of click where players are selectable
-const MinDistanceSquared = 400
+const MinDistanceSquared = 350
 
 function MouseClick(event)
 {
@@ -95,10 +95,11 @@ function MouseClick(event)
 	// <!-- if mouse was dragged, do not deselect or select. -->
 	if (Math.pow(MouseDownPosX - pos.X, 2) + Math.pow(MouseDownPosY - pos.Y, 2) > 45)
 		return
-
+	
+	
 	var initialdis = MinDistanceSquared * CameraZoom
 	var minDis = initialdis
-	var PlayerToSelect = SELECTED_NOTHING
+	var objectToSelect = null
 	for (var I in AllPlayers)
 	{
 		var p = AllPlayers[I]
@@ -108,37 +109,43 @@ function MouseClick(event)
 		var dis = Math.pow(XtoCanvas(p.X) - pos.X, 2) + Math.pow(YtoCanvas(p.Z) - pos.Y, 2)
 		if (dis < minDis)
 		{
-			PlayerToSelect = parseInt(I)
+			objectToSelect = p
 			minDis = dis
 		}
 	}
-	var doubleclickused = false
-	// if no players detected nearby, or selected the same player
-	if (minDis == initialdis)
+	for (var I in AllProj)
 	{
-		PlayerToSelect = SELECTED_NOTHING
-
-		//Planned: show coords (on draw on canvas? maybe easier to overlay)
-	}
-	else
-	{
-		if (doubleClickTimer != null)
+		const p = AllProj[I]
+		var dis = (Math.pow(XtoCanvas(p.X) - pos.X, 2) + Math.pow(YtoCanvas(p.Z) - pos.Y, 2)) * 2 // less click priority than players
+		if (dis < minDis)
 		{
-			selection_SelectPlayersSquad(PlayerToSelect)
-			doubleclick_Clear()
-			doubleclickused = true
+			objectToSelect = p
+			minDis = dis
 		}
-
-		if (PlayerToSelect == SelectedPlayer)
-			PlayerToSelect = SELECTED_NOTHING
-
-
 	}
-	selection_SelectPlayer(PlayerToSelect)
-	if (!doubleclickused)
+	
+	// Didn't click on anything, deselect
+	if (objectToSelect == null) {
+		selection_SelectPlayer(SELECTED_NOTHING)
+	}
+	
+	if (doubleClickTimer == null) {
 		doubleclick_StartTimer()
-
+		handleSingleClick(objectToSelect)
+	} else {
+		doubleclick_Clear()
+		handleDoubleClick(objectToSelect)
+	}
+	
 	redrawIfNotPlaying()
+}
+
+function handleSingleClick(objectClicked) {
+	selection_SelectObject(objectClicked)
+}
+
+function handleDoubleClick(objectClicked) {
+	selection_selectObjectSquad(objectClicked)
 }
 
 

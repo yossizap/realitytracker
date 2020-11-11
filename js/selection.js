@@ -27,6 +27,26 @@ var SelectedVehicle = SELECTED_NOTHING
 var SelectedSquadTeam = SELECTED_NOTHING
 var SelectedSquadNumber = SELECTED_NOTHING
 
+function selection_SelectObject(obj) {
+	if (obj == null)
+		selection_SelectPlayer(SELECTED_NOTHING)
+	else if (obj instanceof PlayerObject)
+		selection_SelectPlayer(obj.id)
+	else if (obj instanceof ProjObject)
+		selection_SelectPlayer(obj.player.id, true)
+}
+
+function selection_selectObjectSquad(object) {
+	if (object != null)
+	{
+		if (object instanceof PlayerObject)
+			selection_SelectPlayersSquad(object.id)
+		else if (object instanceof ProjObject)
+			selection_SelectPlayersSquad(object.player.id)
+	}
+	selection_SelectPlayer(SELECTED_NOTHING)
+}
+
 function selection_SelectPlayer(i, allowHighlight)
 {
 	var selectingSamePlayer = (i == SelectedPlayer)
