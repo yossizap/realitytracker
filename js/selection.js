@@ -201,7 +201,7 @@ function selection_UpdateInformationBox()
 				div.innerHTML += " Leader"
 		} 
 		div.innerHTML += "<br>" + escapeHtml(p.name)
-		div.appendChild(icons[p.kitImage].cloneNode(false))
+		div.appendChild(p.kitImage.cloneNode(false))
 		div.innerHTML += "<br>Height: " + p.Y	
 		
 		

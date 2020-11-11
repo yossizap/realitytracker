@@ -355,7 +355,7 @@ function drawPlayer_DrawSLNumber(p, x, y)
 
 function drawPlayer_DrawKit(p, x, y)
 {
-	Context.drawImage(icons[p.kitImage], x - 7, y - 7, 14, 14)
+	Context.drawImage(p.kitImage, x - 7, y - 7, 14, 14)
 }
 
 function drawPlayer_DrawDead(p, x, y)
@@ -633,7 +633,7 @@ function drawVehicle(i)
 	Context.translate(x, y)
 	Context.rotate(rot / 180 * Math.PI)
 	
-	Context.drawImage(coloredIcons[v.mapImage][color], -11, -11, 22, 22)
+	Context.drawImage(v.mapImage[color], -11, -11, 22, 22)
 	Context.restore()
 
 	if (v.isFlyingVehicle && options_DrawVehicleHeight)

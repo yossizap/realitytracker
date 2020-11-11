@@ -131,7 +131,7 @@ function PlayerObject(_id)
 	this.Y = null
 	this.Z = null
 
-	this.kitImage = KitNameToImageDictionary["rifleman"]
+	this.kitImage = icons[KitNameToImageDictionary["rifleman"]]
 
 	//interpolation
 	this.lastX = null
@@ -300,8 +300,8 @@ function PlayerUpdate(FullMessage)
 			if (Player.kit != "")
 			{
 				var KitSubName = Player.kit.split("_")[1]
-				if (KitSubName in KitNameToImageDictionary)
-					Player.kitImage = KitNameToImageDictionary[KitSubName]
+				if (KitSubName in KitNameToImageDictionary && KitNameToImageDictionary[KitSubName] in icons)
+					Player.kitImage = icons[KitNameToImageDictionary[KitSubName]]
 				else
 					console.log("Parser: unknown kit name " + Player.kit)
 			}
@@ -402,8 +402,8 @@ function VehicleObject(_id)
 	this.isFlyingVehicle = false
 	this.isClimbingVehicle = false
 
-	this.menuImage = ""
-	this.mapImage = "mini_shp_light"
+	this.menuImage = null
+	this.mapImage = coloredIcons["mini_shp_light"]
 
 	this.maxHealth = 0
 	this.health = 0
@@ -459,9 +459,9 @@ function VehicleAdd(FullMessage)
 		if (CurrentVehicle.name in vehicleData)
 		{
 			const data = vehicleData[CurrentVehicle.name]
-			CurrentVehicle.mapImage = data.MiniMapIcon //Map Image is a must
+			CurrentVehicle.mapImage = coloredIcons[data.MiniMapIcon] //Map Image is a must
 			if (data.MenuIcon != "")
-				CurrentVehicle.menuImage = data.MenuIcon //Menuimage is optional
+				CurrentVehicle.menuImage = icons[data.MenuIcon] //Menuimage is optional
 		}
 		else
 			console.log("Parser: Vehicle Name not in dictionary: " + CurrentVehicle.name)
