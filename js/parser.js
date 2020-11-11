@@ -786,7 +786,9 @@ function ProjObject(id, playerid, type, templateName, yaw, X, Y, Z)
 	this.type = type
 	this.player = AllPlayers[playerid]
 	this.team = this.player.team // so if player disconnects while projectile in air we still have team. player should always exist
-
+	
+	this.icon = coloredIcons[ProjectileTypeToImageName[type]]
+	
 	AllProj[id] = this
 }
 

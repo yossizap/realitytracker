@@ -701,28 +701,50 @@ function drawProj(i)
 	const y = YtoCanvas(interpolate(proj.lastZ, proj.Z))
 	
 	
-	// TODO cba to import skull mark
-	Context.save()
+	var color = proj.team - 1
+	if (proj.player != null)
+	{
+		const p = proj.player
+		if (SelectedPlayer == p.id)
+		{
+			color = 3
+		}
+		else if (p.team == SelectedSquadTeam && p.squad == SelectedSquadNumber)
+		{
+			color = 2
+		}
+	}
 	
-	Context.lineWidth = 2;
-	if (proj.team == 1)
-		Context.strokeStyle = Style_RedTeam
-	else
-		Context.strokeStyle = Style_BlueTeam
 	
-	Context.beginPath()
-	Context.moveTo(x-4, y-4)
-	Context.lineTo(x+4, y+4)
-	Context.stroke()
-	Context.fill()
-	
-	Context.beginPath()
-	Context.moveTo(x+4, y-4)
-	Context.lineTo(x-4, y+4)
-	Context.stroke()
-	Context.fill()
-	
-	Context.restore()
+	if (proj.icon != null) 
+	{
+		Context.drawImage(proj.icon[color], x - 8, y - 8) 
+	}
+	else 
+	{
+		// TODO placeholder
+		const style = [Style_RedTeam, Style_BlueTeam, Style_SquadSelection, "white"][color]
+		
+		Context.save()
+		
+		Context.lineWidth = 2;
+		Context.strokeStyle = style
+
+		
+		Context.beginPath()
+		Context.moveTo(x-4, y-4)
+		Context.lineTo(x+4, y+4)
+		Context.stroke()
+		Context.fill()
+		
+		Context.beginPath()
+		Context.moveTo(x+4, y-4)
+		Context.lineTo(x-4, y+4)
+		Context.stroke()
+		Context.fill()
+		
+		Context.restore()
+	}
 }
 
 

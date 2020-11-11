@@ -133,6 +133,23 @@ function objectLoaded()
 }
 
 
+
+const ProjectileTypeToImageName = {
+		0: null,	// PROJECTILE_TYPE_UNKNOWN = 0
+		1: null,	// PROJECTILE_TYPE_MINE_VICTIM_AT = 1
+		2: null,	// PROJECTILE_TYPE_MINE_VICTIM_AP = 2
+		3: null,	// PROJECTILE_TYPE_MINE_REMOTE_AT = 3
+		4: null,	// PROJECTILE_TYPE_MINE_REMOTE_AP = 4
+		5: null,	// PROJECTILE_TYPE_C4_SMALL = 5
+		6: null,	// PROJECTILE_TYPE_C4_LARGE = 6
+		32: null,	// PROJECTILE_TYPE_AT_LIGHT = 32
+		33: null,	// PROJECTILE_TYPE_AT_HEAVY = 33
+		34: null,	// PROJECTILE_TYPE_AT_TOW = 34
+		35: null,	// PROJECTILE_TYPE_AA_AA = 35
+		36: null,	// PROJECTILE_TYPE_GRENADIER = 36
+		37: null,	// PROJECTILE_TYPE_MORTAR = 37
+}
+
 var coloredIcons = {}
 // TODO might be race condition here? probably done synchronized though because its not actual remote loading
 function createColoredMapIcons()
@@ -140,6 +157,11 @@ function createColoredMapIcons()
 	var imagesToColor = new Set()
 	for (var vehicle in vehicleData)
 		imagesToColor.add(vehicleData[vehicle].MiniMapIcon)
+	
+	for (var projectileType in ProjectileTypeToImageName)
+		if (ProjectileTypeToImageName[projectileType] != null)
+			imagesToColor.add(ProjectileTypeToImageName[projectileType])
+	
 	
 	imagesToColor.forEach((name) => {
 		var tempImg = new Image()
