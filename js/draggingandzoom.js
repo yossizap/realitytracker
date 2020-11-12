@@ -103,10 +103,12 @@ function MouseClick(event)
 	for (var I in AllPlayers)
 	{
 		var p = AllPlayers[I]
+		const x = interpolate(p.lastX, p.X)
+		const z = interpolate(p.lastZ, p.Z)
 		if (p.isJoining)
 			continue
 		
-		var dis = Math.pow(XtoCanvas(p.X) - pos.X, 2) + Math.pow(YtoCanvas(p.Z) - pos.Y, 2)
+		var dis = Math.pow(XtoCanvas(x) - pos.X, 2) + Math.pow(YtoCanvas(z) - pos.Y, 2)
 		if (dis < minDis)
 		{
 			objectToSelect = p
@@ -116,7 +118,9 @@ function MouseClick(event)
 	for (var I in AllProj)
 	{
 		const p = AllProj[I]
-		var dis = (Math.pow(XtoCanvas(p.X) - pos.X, 2) + Math.pow(YtoCanvas(p.Z) - pos.Y, 2)) * 2 // less click priority than players
+		const x = interpolate(p.lastX, p.X)
+		const z = interpolate(p.lastZ, p.Z)
+		var dis = (Math.pow(XtoCanvas(x) - pos.X, 2) + Math.pow(YtoCanvas(z) - pos.Y, 2)) * 2 // less click priority than players
 		if (dis < minDis)
 		{
 			objectToSelect = p

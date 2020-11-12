@@ -32,7 +32,7 @@ function selection_SelectObject(obj) {
 		selection_SelectPlayer(SELECTED_NOTHING)
 	else if (obj instanceof PlayerObject)
 		selection_SelectPlayer(obj.id)
-	else if (obj instanceof ProjObject)
+	else if (obj instanceof ProjObject && obj.player != null)
 		selection_SelectPlayer(obj.player.id, true)
 }
 
