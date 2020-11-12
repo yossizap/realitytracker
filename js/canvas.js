@@ -19,6 +19,11 @@ function interpolate(Start, End)
 	return Start * (1 - interpolation_CurrentAmount) + End * interpolation_CurrentAmount
 }
 
+function extrapolate(Start, End, extra)
+{
+	return Start * (1 - interpolation_CurrentAmount - extra) + End * (interpolation_CurrentAmount + extra)
+}
+
 function interpolateAngle(Start, End)
 {
 	if (End - Start > 180)
@@ -697,8 +702,12 @@ function drawProj(i)
 {
 	const proj = AllProj[i]
 	
-	const x = XtoCanvas(interpolate(proj.lastX, proj.X))
-	const y = YtoCanvas(interpolate(proj.lastZ, proj.Z))
+	// Projectiles take a while to delete after hitting. Ignore fast projectiles when they stop moving
+	if (proj.isFast && Math.abs(proj.lastX - proj.X) < 10 && Math.abs(proj.lastZ - proj.Z) < 10)
+		return
+	
+	const x = XtoCanvas(extrapolate(proj.lastX, proj.X, 0.1))
+	const y = YtoCanvas(extrapolate(proj.lastZ, proj.Z, 0.1))
 	
 	
 	var color = proj.team - 1
@@ -718,7 +727,14 @@ function drawProj(i)
 	
 	if (proj.icon != null) 
 	{
-		Context.drawImage(proj.icon[color], x - 8, y - 8) 
+		Context.save()
+		
+		Context.translate(x, y)
+		if (proj.shouldRotate)
+			Context.rotate(proj.yaw / 180 * Math.PI)
+		Context.drawImage(proj.icon[color], -8, -8) 
+		
+		Context.restore()
 	}
 	else 
 	{

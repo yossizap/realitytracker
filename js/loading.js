@@ -133,21 +133,41 @@ function objectLoaded()
 }
 
 
-
+const ProjectileTypeShouldRotate = {
+	0: false,	// PROJECTILE_TYPE_UNKNOWN = 0
+	1: false,	// PROJECTILE_TYPE_MINE_VICTIM_AT = 1
+	2: false,	// PROJECTILE_TYPE_MINE_VICTIM_AP = 2
+	3: false,	// PROJECTILE_TYPE_MINE_REMOTE_AT = 3
+	4: false,	// PROJECTILE_TYPE_MINE_REMOTE_AP = 4
+	5: false,	// PROJECTILE_TYPE_C4_SMALL = 5
+	6: false,	// PROJECTILE_TYPE_C4_LARGE = 6
+	32: true,	// PROJECTILE_TYPE_AT_LIGHT = 32
+	33: true,	// PROJECTILE_TYPE_AT_HEAVY = 33
+	34: true,	// PROJECTILE_TYPE_AT_TOW = 34
+	35: true,	// PROJECTILE_TYPE_AA_AA = 35
+	36: true,	// PROJECTILE_TYPE_GRENADIER = 36
+	37: true,	// PROJECTILE_TYPE_MORTAR = 37
+	38: false,	//PROJECTILE_TYPE_GRENADEFRAG = 38
+	39: false,	//PROJECTILE_TYPE_SMOKE = 39
+	40: true,	//PROJECTILE_TYPE_TANKSHELL = 40
+}
 const ProjectileTypeToImageName = {
 		0: null,	// PROJECTILE_TYPE_UNKNOWN = 0
-		1: null,	// PROJECTILE_TYPE_MINE_VICTIM_AT = 1
-		2: null,	// PROJECTILE_TYPE_MINE_VICTIM_AP = 2
-		3: null,	// PROJECTILE_TYPE_MINE_REMOTE_AT = 3
-		4: null,	// PROJECTILE_TYPE_MINE_REMOTE_AP = 4
-		5: null,	// PROJECTILE_TYPE_C4_SMALL = 5
-		6: null,	// PROJECTILE_TYPE_C4_LARGE = 6
-		32: null,	// PROJECTILE_TYPE_AT_LIGHT = 32
-		33: null,	// PROJECTILE_TYPE_AT_HEAVY = 33
-		34: null,	// PROJECTILE_TYPE_AT_TOW = 34
-		35: null,	// PROJECTILE_TYPE_AA_AA = 35
-		36: null,	// PROJECTILE_TYPE_GRENADIER = 36
-		37: null,	// PROJECTILE_TYPE_MORTAR = 37
+		1: "proj_mineat",	// PROJECTILE_TYPE_MINE_VICTIM_AT = 1
+		2: "proj_mineap",	// PROJECTILE_TYPE_MINE_VICTIM_AP = 2
+		3: "proj_mineatremote",	// PROJECTILE_TYPE_MINE_REMOTE_AT = 3
+		4: "proj_mineap",	// PROJECTILE_TYPE_MINE_REMOTE_AP = 4
+		5: "proj_c4",	// PROJECTILE_TYPE_C4_SMALL = 5
+		6: "proj_c4satchel",	// PROJECTILE_TYPE_C4_LARGE = 6
+		32: "proj_lat",	// PROJECTILE_TYPE_AT_LIGHT = 32
+		33: "proj_hat",	// PROJECTILE_TYPE_AT_HEAVY = 33
+		34: "proj_tow",	// PROJECTILE_TYPE_AT_TOW = 34
+		35: "proj_aa",	// PROJECTILE_TYPE_AA_AA = 35
+		36: "proj_grenadier",	// PROJECTILE_TYPE_GRENADIER = 36
+		37: "proj_mortar",	// PROJECTILE_TYPE_MORTAR = 37
+		38: "proj_frag",	//PROJECTILE_TYPE_GRENADEFRAG = 38
+		39: "proj_smoke",	//PROJECTILE_TYPE_SMOKE = 39
+		40: null,	//PROJECTILE_TYPE_TANKSHELL = 40
 }
 
 var coloredIcons = {}

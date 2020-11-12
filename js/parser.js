@@ -788,6 +788,8 @@ function ProjObject(id, playerid, type, templateName, yaw, X, Y, Z)
 	this.team = this.player.team // so if player disconnects while projectile in air we still have team. player should always exist
 	
 	this.icon = coloredIcons[ProjectileTypeToImageName[type]]
+	this.shouldRotate = ProjectileTypeShouldRotate[type]
+	this.isFast = false
 	
 	AllProj[id] = this
 }
@@ -809,6 +811,8 @@ function ProjUpdate(FullMessage)
 		proj.X = parsed[2]
 		proj.Y = parsed[3]
 		proj.Z = parsed[4]
+		
+		proj.isFast = proj.isFast | (Math.pow(proj.X - proj.lastX, 2) + Math.pow(proj.Z - proj.lastZ, 2) > 10000) // 100m/s
 	}
 }
 
