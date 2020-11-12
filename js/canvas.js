@@ -706,8 +706,8 @@ function drawProj(i)
 	if (proj.isFast && Math.abs(proj.lastX - proj.X) < 10 && Math.abs(proj.lastZ - proj.Z) < 10)
 		return
 	
-	const x = XtoCanvas(extrapolate(proj.lastX, proj.X, 0.1))
-	const y = YtoCanvas(extrapolate(proj.lastZ, proj.Z, 0.1))
+	const x = XtoCanvas(interpolate(proj.lastX, proj.X))
+	const y = YtoCanvas(interpolate(proj.lastZ, proj.Z))
 	
 	
 	var color = proj.team - 1

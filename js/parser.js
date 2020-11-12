@@ -812,7 +812,7 @@ function ProjUpdate(FullMessage)
 		proj.Y = parsed[3]
 		proj.Z = parsed[4]
 		
-		proj.isFast = proj.isFast | (Math.pow(proj.X - proj.lastX, 2) + Math.pow(proj.Z - proj.lastZ, 2) > 10000) // 100m/s
+		proj.isFast = proj.isFast | (Math.pow(proj.X - proj.lastX, 2) + Math.pow(proj.Z - proj.lastZ, 2) > 1600) // 40m/s
 	}
 }
 
@@ -1599,6 +1599,7 @@ function messageArray()
 {
 	this.messages = []
 	this.pos = 0
+	
 
 	this.getMessageAt = function (i)
 	{
@@ -1632,7 +1633,9 @@ function messageArray()
 		this.pos += 2 + Length
 		return message
 	}
-
+	
+	this._lasttickIndex = 0;
+	
 	// Update the messages var
 	this.updateNewMessages = function ()
 	{
@@ -1655,7 +1658,22 @@ function messageArray()
 
 	this.addMessage = function (message)
 	{
-		this.messages.push(message)
+		const messageType = message.getUint8(0);
+		if (messageType == MESSAGETYPE.TICK)
+			this._lasttickIndex = this.messages.length;
+			
+		// Reorder Projectile messages to be one tick early, so interpolation doesn't make it late
+		// Add / remove / update will keep their order if we always insert before the TICK message
+		if (messageType == MESSAGETYPE.PROJ_UPDATE || messageType == MESSAGETYPE.PROJ_ADD || messageType == MESSAGETYPE.PROJ_REMOVE)
+		{
+			this.messages.splice( this._lasttickIndex, 0, message );
+			this._lasttickIndex++;
+		} else {
+			this.messages.push(message)
+		}
+		
+		
+		
 	}
 }
 
