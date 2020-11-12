@@ -812,7 +812,7 @@ function ProjUpdate(FullMessage)
 		proj.Y = parsed[3]
 		proj.Z = parsed[4]
 		
-		proj.isFast = proj.isFast | (Math.pow(proj.X - proj.lastX, 2) + Math.pow(proj.Z - proj.lastZ, 2) > 1600) // 40m/s
+		proj.isFast = proj.isFast | (Math.pow(proj.X - proj.lastX, 2) + Math.pow(proj.Z - proj.lastZ, 2) > 1600 * DemoTimePerTick) // 40m/s
 	}
 }
 
