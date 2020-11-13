@@ -273,9 +273,9 @@ function drawPlayer(index)
 	if (p.isJoining || p.lastX == null) //Skip if joining or unknown pos
 		return
 	
-	var x = XtoCanvas(interpolate(p.lastX, p.X))
-	var y = YtoCanvas(interpolate(p.lastZ, p.Z))
-	const rot = interpolateAngle(p.Lastrotation, p.rotation)
+	var x = p.getCanvasX()
+	var y = p.getCanvasY()
+	const rot = p.getRotation()
 	const isSquadSelected = (p.team == SelectedSquadTeam && p.squad == SelectedSquadNumber)
 	const isPlayerSelected = (SelectedPlayer == index)
 	
@@ -613,9 +613,9 @@ function drawVehicle(i)
 		return
 
 
-	var x = XtoCanvas(interpolate(v.lastX, v.X))
-	var y = YtoCanvas(interpolate(v.lastZ, v.Z))
-	const rot = interpolateAngle(v.Lastrotation, v.rotation)
+	var x = v.getCanvasX();
+	var y = v.getCanvasY();
+	const rot = v.getRotation();
 
 	var color
 	// if vehicle is selected 
@@ -706,8 +706,8 @@ function drawProj(i)
 	if (proj.isFast && Math.abs(proj.lastX - proj.X) < 10 && Math.abs(proj.lastZ - proj.Z) < 10)
 		return
 	
-	const x = XtoCanvas(interpolate(proj.lastX, proj.X))
-	const y = YtoCanvas(interpolate(proj.lastZ, proj.Z))
+	const x = proj.getCanvasX()
+	const y = proj.getCanvasY()
 	
 	
 	var color = proj.team - 1
@@ -731,7 +731,7 @@ function drawProj(i)
 		
 		Context.translate(x, y)
 		if (proj.shouldRotate)
-			Context.rotate(proj.yaw / 180 * Math.PI)
+			Context.rotate(proj.rotation / 180 * Math.PI)
 		Context.drawImage(proj.icon[color], -8, -8) 
 		
 		Context.restore()

@@ -100,49 +100,100 @@ function message_Tick(FullMessage)
 	}
 }
 
+
+
+class GameObject
+{
+	constructor(X,Y,Z) {
+		this.X = X
+		this.Y = Y
+		this.Z = Z
+	}
+	getX() {
+		return this.X;
+	}
+	getZ() {
+		return this.Z;
+	}
+	getRotation() {
+		return 0
+	}
+	getCanvasX() {
+		return XtoCanvas(this.getX())
+	}
+	getCanvasY() {
+		return YtoCanvas(this.getZ())
+	}
+	
+}
+
+class InterpolatedGameObject extends GameObject
+{
+	constructor(X,Y,Z) {
+		super(X,Y,Z)
+		this.lastX = X
+		this.lastZ = Z
+		this.rotation = 0
+		this.lastRotation = 0
+	}
+	
+	getX() {
+		return interpolate(this.lastX, this.X);
+	}
+	getZ() {
+		return interpolate(this.lastZ, this.Z);
+	}
+	getRotation() {
+		return interpolateAngle(this.lastRotation, this.rotation);
+	}
+	updateInterpHistory(){
+		this.lastX = this.X
+		this.lastZ = this.Z
+		this.lastRotation = this.rotation;
+	}
+	
+}
+
+
 // Dictionary of all players 
 var AllPlayers = {}
 
-function PlayerObject(_id)
+class PlayerObject extends InterpolatedGameObject
 {
-	this.id = _id
-	this.name = 'error!!!'
-	this.isJoining = true
-	this.isAlive = false
-	this.squad = 0
-	this.isSquadLeader = false
-	this.vehicleid = -1
-	this.vehicleSeatName = ""
-	this.vehicleSlot = 0
-	this.score = 0
-	this.scoreTW = 0
-	this.kills = 0
-	this.deaths = 0
-	this.ping = 0
-	this.team = 0
-	this.idle = 0
-	this.kit = ""
+	constructor(_id) {
+		super(NaN,NaN,NaN)
+		this.id = _id
+		this.name = 'error!!!'
+		this.isJoining = true
+		this.isAlive = false
+		this.squad = 0
+		this.isSquadLeader = false
+		this.vehicleid = -1
+		this.vehicleSeatName = ""
+		this.vehicleSlot = 0
+		this.score = 0
+		this.scoreTW = 0
+		this.kills = 0
+		this.deaths = 0
+		this.ping = 0
+		this.team = 0
+		this.idle = 0
+		this.kit = ""
 
-	this.health = 0
-	this.maxHealth = 100
+		this.health = 0
+		this.maxHealth = 100
 
-	this.rotation = 0
-	this.X = null
-	this.Y = null
-	this.Z = null
+		this.rotation = 0
 
-	this.kitImage = icons[KitNameToImageDictionary["rifleman"]]
+		this.kitImage = icons[KitNameToImageDictionary["rifleman"]]
 
-	//interpolation
-	this.lastX = null
-	this.lastZ = null
-	this.Lastrotation = 0
 
-	//Private data
-	this.hash = null
-	this.ip = null
+		//Private data
+		this.hash = null
+		this.ip = null
 
-	AllPlayers[this.id] = this
+		AllPlayers[this.id] = this
+	}
 }
 
 const PLAYERUPDATEFLAGS = {
@@ -389,43 +440,41 @@ function RemovePlayerFromVehicle(id)
 // Dictionary of vehicles 
 var AllVehicles = {}
 
-function VehicleObject(_id)
+class VehicleObject extends InterpolatedGameObject
 {
-	this.id = _id
-	this.name = ""
-	this.team = 0
-	this.rotation = 0
-	this.X = 0
-	this.Y = 0
-	this.Z = 0
-
-	this.isFlyingVehicle = false
-	this.isClimbingVehicle = false
-
-	this.menuImage = null
-	this.mapImage = coloredIcons["mini_shp_light"]
-
-	this.maxHealth = 0
-	this.health = 0
-
-	this.Passengers = new Set()
-
-	// Get current players inside
-	for (var i in AllPlayers)
+	constructor(id)
 	{
-		const p = AllPlayers[i]
-		if (p.vehicleid == this.id)
-			this.Passengers.add(i)
-	}
+		super(NaN,NaN,NaN)
+		this.id = id
+		this.name = ""
+		this.team = 0
+		this.rotation = 0
 
-	this.lastX = NaN
-	this.lastZ = NaN
-	this.Lastrotation = 0
-	
-	//No Update received for this vehicle yet
-	this.isNew = true
-	
-	AllVehicles[this.id] = this
+		this.isFlyingVehicle = false
+		this.isClimbingVehicle = false
+
+		this.menuImage = null
+		this.mapImage = coloredIcons["mini_shp_light"]
+
+		this.maxHealth = 0
+		this.health = 0
+
+		this.Passengers = new Set()
+
+		// Get current players inside
+		for (var i in AllPlayers)
+		{
+			const p = AllPlayers[i]
+			if (p.vehicleid == this.id)
+				this.Passengers.add(i)
+		}
+		
+		
+		//No Update received for this vehicle yet
+		this.isNew = true
+		
+		AllVehicles[this.id] = this
+	}
 }
 
 var VEHICLEUPDATEFLAGS = {
@@ -547,16 +596,17 @@ function RecheckAllVehicles()
 // -- Flags 
 var AllFlags = {}
 
-function FlagObject(_id, _Team, _X, _Y, _Z, _radius)
+class FlagObject extends GameObject
 {
-	this.X = _X
-	this.Y = _Y
-	this.Z = _Z
-	this.team = _Team
-	this.id = _id
-	this.Radius = _radius
+	constructor(id, Team, X, Y, Z, radius)
+	{
+		super(X,Y,Z)
+		this.team = Team
+		this.id = id
+		this.Radius = radius
 
-	AllFlags[_id] = this
+		AllFlags[id] = this
+	}
 }
 
 function FlagList(FullMessage)
@@ -616,16 +666,17 @@ function SLOrder(FullMessage)
 	}
 }
 
-function SLOrderObject(_TeamSquad, _type, _X, _Y, _Z)
+class SLOrderObject extends GameObject
 {
-	this.team = Math.floor(_TeamSquad / 128) + 1
-	this.squad = (_TeamSquad % 128)
-	this.type = _type
-	this.X = _X
-	this.Y = _Y
-	this.Z = _Z
-	
-	AllSLOrders[_TeamSquad] = this
+	constructor(TeamSquad, type, X, Y, Z)
+	{
+		super(X,Y,Z)
+		this.team = Math.floor(TeamSquad / 128) + 1
+		this.squad = (TeamSquad % 128)
+		this.type = type
+		
+		AllSLOrders[TeamSquad] = this
+	}
 }
 
 function getOrderFromTeamSquad(team,squad)
@@ -636,15 +687,16 @@ function getOrderFromTeamSquad(team,squad)
 // Rallies 
 var AllRallies = {}
 
-function RallyObject(_TeamSquad, _X, _Y, _Z)
+class RallyObject extends GameObject
 {
-	this.team = Math.floor(_TeamSquad / 128) + 1
-	this.squad = (_TeamSquad % 128)
-	this.X = _X
-	this.Y = _Y
-	this.Z = _Z
-
-	AllRallies[_TeamSquad] = this
+	constructor(TeamSquad, X, Y, Z)
+	{
+		super(X,Y,Z)
+		this.team = Math.floor(TeamSquad / 128) + 1
+		this.squad = (TeamSquad % 128)
+		
+		AllRallies[TeamSquad] = this
+	}
 }
 
 function RallyAdd(FullMessage)
@@ -675,15 +727,16 @@ function RallyRemove(FullMessage)
 // -- Fobs 
 var AllFobs = {}
 
-function FoBObject(_id, _Team, _X, _Y, _Z)
+class FoBObject extends GameObject
 {
-	this.id = _id
-	this.team = _Team
-	this.X = _X
-	this.Y = _Y
-	this.Z = _Z
+	constructor(id, Team, X, Y, Z) 
+	{
+		super(X,Y,Z)
+		this.id = id
+		this.team = Team
 
-	AllFobs[_id] = this
+		AllFobs[id] = this
+	}
 }
 
 function FoBAdd(FullMessage)
@@ -722,15 +775,16 @@ function FoBRemove(FullMessage)
 // Caches
 var AllCaches = {}
 
-function CacheObject(id, X, Y, Z)
+class CacheObject extends GameObject
 {
-	this.id = id
-	this.X = X
-	this.Y = Y
-	this.Z = Z
-	this.revealed = false
+	constructor(id, X, Y, Z)
+	{
+		super(X,Y,Z)
+		this.id = id
+		this.revealed = false
 
-	AllCaches[id] = this
+		AllCaches[id] = this
+	}
 }
 
 function CacheAdd(FullMessage)
@@ -772,26 +826,24 @@ function CacheDestroyed(FullMessage)
 }
 
 var AllProj = {}
-function ProjObject(id, playerid, type, templateName, yaw, X, Y, Z)
+class ProjObject extends InterpolatedGameObject
 {
-	this.id = id
-	this.X = X
-	this.Y = Y
-	this.Z = Z
-	this.lastX = X
-	this.lastZ = Z
-	
-	this.yaw = yaw
-	this.templateName = templateName
-	this.type = type
-	this.player = AllPlayers[playerid]
-	this.team = this.player ? this.player.team : 1 // so if player disconnects while projectile in air we still have team.
-	
-	this.icon = coloredIcons[ProjectileTypeToImageName[type]]
-	this.shouldRotate = ProjectileTypeShouldRotate[type]
-	this.isFast = false
-	
-	AllProj[id] = this
+	constructor(id, playerid, type, templateName, rotation, X, Y, Z) {
+		super(X,Y,Z)
+		this.id = id
+		
+		this.rotation = rotation
+		this.templateName = templateName
+		this.type = type
+		this.player = AllPlayers[playerid]
+		this.team = this.player ? this.player.team : 1 // so if player disconnects while projectile in air we still have team.
+		
+		this.icon = coloredIcons[ProjectileTypeToImageName[type]]
+		this.shouldRotate = ProjectileTypeShouldRotate[type]
+		this.isFast = false
+		
+		AllProj[id] = this
+	}
 }
 
 function ProjUpdate(FullMessage) 
@@ -1065,23 +1117,11 @@ function Update()
 	// Interpolation
 	if (!isFastForwarding) // Do not interpolate when fast forwarding
 	{
-		for (var i in AllPlayers)
-		{
-			AllPlayers[i].Lastrotation = AllPlayers[i].rotation
-			AllPlayers[i].lastX = AllPlayers[i].X
-			AllPlayers[i].lastZ = AllPlayers[i].Z
-		}
-		for (var i in AllVehicles)
-		{
-			AllVehicles[i].Lastrotation = AllVehicles[i].rotation
-			AllVehicles[i].lastX = AllVehicles[i].X
-			AllVehicles[i].lastZ = AllVehicles[i].Z
-		}
-		for (var i in AllProj)
-		{
-			AllProj[i].lastX = AllProj[i].X
-			AllProj[i].lastZ = AllProj[i].Z
-		}
+		[AllPlayers, AllVehicles, AllProj]
+			.forEach((dict) => { 
+				for (var key in dict)
+					dict[key].updateInterpHistory()
+				})
 	}
 
 	// Main message parsing loop, parse until tick message

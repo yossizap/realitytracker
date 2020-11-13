@@ -44,12 +44,10 @@ function killLine_Draw(Kill)
 	Context.globalAlpha = Math.max(Fade, 0)
 
 
-
-	var x1 = XtoCanvas(interpolate(Atk.lastX, Atk.X))
-	var y1 = YtoCanvas(interpolate(Atk.lastZ, Atk.Z))
-	// No point in interpolating a dead body
-	var x2 = XtoCanvas(Vic.X)
-	var y2 = YtoCanvas(Vic.Z)
+	var x1 = Atk.getCanvasX()
+	var y1 = Atk.getCanvasY()
+	var x2 = Vic.getCanvasX()
+	var y2 = Vic.getCanvasY()
 	drawArrow(x1, x2, y1, y2, Atk.team, Atk.squad)
 
 
