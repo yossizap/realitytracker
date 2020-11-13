@@ -703,7 +703,9 @@ function drawProj(i)
 	const proj = AllProj[i]
 	
 	// Projectiles take a while to delete after hitting. Ignore fast projectiles when they stop moving
-	if (proj.isFast && Math.abs(proj.lastX - proj.X) < 10 && Math.abs(proj.lastZ - proj.Z) < 10)
+	if (proj.isFast && Math.abs(proj.lastX - proj.X) < 10 
+					&& Math.abs(proj.lastY - proj.Y) < 10 
+					&& Math.abs(proj.lastZ - proj.Z) < 10)
 		return
 	
 	const x = proj.getCanvasX()
