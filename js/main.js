@@ -243,6 +243,21 @@ function updateHeader()
 		$("#headerInner")[0].innerHTML = tickets2 + " - " + tickets1 + " " + getTimeStringOfTick(Tick_Current) + " x" + playSpeed.toFixed(1)
 }
 
+function getTimeInSecondsFromString(time) {
+	const re = /(\d{0,2})[hH]?(\d{0,2})[Mm]?(\d{0,2})[Ss]?/
+	const match = re.exec(time)
+	if (match)
+		return (match[1] * 3600) + (match[2] * 60) + (match[3] * 1)
+	return 0
+	
+}
+
+function getTickfromTimeString(time) {
+	const seconds = roundLength + briefingtime - getTimeInSecondsFromString(time)
+	const tick = tickToTime.findIndex(x => x > seconds)
+	return tick
+}
+
 function getTimeStringOfTick(tick)
 {
 	if (tick >= tickToTime.length) tick = tickToTime.length - 1

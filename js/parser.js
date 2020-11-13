@@ -995,6 +995,9 @@ function goTo(Tick_Target)
 		drawCanvas()
 }
 
+
+
+
 function loadState(SavedTick)
 {
 	if (SavedTick == 0)
@@ -1041,6 +1044,14 @@ function saveState()
 	const state = {
 		SquadNames: JSON.stringify(SquadNames),
 		
+		AllPlayers: copyList(AllPlayers),
+		AllVehicles: copyList(AllVehicles),
+		AllFobs: copyList(AllFobs),
+		AllFlags:copyList(AllFlags),
+		AllCaches: copyList(AllCaches),
+		AllRallies: copyList(AllRallies),
+		AllSLOrders: copyList(AllSLOrders),
+		AllProj: copyList(AllProj),
 		
 		tickets1: tickets1,
 		tickets2: tickets2,
@@ -1053,14 +1064,7 @@ function saveState()
 		killLines: JSON.stringify(killLines),
 	}
 	
-	state.AllPlayers = copyList(AllPlayers)
-	state.AllVehicles = copyList(AllVehicles)
-	state.AllFobs = copyList(AllFobs)
-	state.AllFlags = copyList(AllFlags)
-	state.AllCaches = copyList(AllCaches)
-	state.AllRallies = copyList(AllRallies)
-	state.AllSLOrders = copyList(AllSLOrders)
-	state.AllProj = copyList(AllProj)
+
 	
 	for (var handler in eventArrays)
 		eventArrays[handler].saveState(state)
@@ -1102,7 +1106,6 @@ function Reset()
 
 
 var InitialParse = true
-// Run Messages until vehicle update (Which in current version is the last message of an update) 
 // Call this to advance time by one tick 
 function Update()
 {
@@ -1162,7 +1165,6 @@ function Update()
 
 	// Call UI stuff
 	onUpdate()
-		//
 
 	return true
 }

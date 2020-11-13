@@ -493,8 +493,14 @@ function stage4LoadingFininshed()
 	
 	//Reset speed to 1
 	setSpeed(1)
-	
+		
 	onLoad()
+	
+	if (getUrlParameter("t")) {
+		const tick = getTickfromTimeString(getUrlParameter("t"))
+		if (tick != -1)
+			goTo(tick)
+	}
 }
 
 function writeServerInfoTable()
