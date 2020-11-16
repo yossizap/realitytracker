@@ -44,7 +44,10 @@ function MouseDown(event)
 		return
 
 	event.preventDefault();
-	EndZoom() //stop zooming
+
+	//stop zooming
+	if (ZoomAnimation.instance != null)
+		ZoomAnimation.instance.delete();
 	var pos = GetMousePos(event)
 	MouseDownPosX = pos.X
 	MouseDownPosY = pos.Y
@@ -168,81 +171,63 @@ function doubleclick_Clear()
 
 
 
-// -- Zoom animation system
-// Animation frames
-var ZoomNumOfTicks = 0 //calculated per zoom
-// Time per frame
-var ZoomMousePos = null
-var ZoomAmount = 1
-var ZoomTicks = 10000000
-const ZoomTotalTime = 250
-
-
 function Wheel(event)
 {
-	if (event.deltaY < 0)
-		ZoomAmount = 1.25
-	else
-		ZoomAmount = 0.75
-
-	ZoomMousePos = GetMousePos(event)
-	BeginZoom()
-}
-
-
-
-$(()=> redrawNeededChecks.push(TickZoom))
-function BeginZoom()
-{
-	// Don't do anything if mouse is down
 	if (MouseIsDown)
 		return;
 
-	ZoomTicks = 0
-	ZoomNumOfTicks = ZoomTotalTime / frameTime
-
-	var Amount = Math.pow(ZoomAmount, 1 / ((ZoomTicks + 1) * 2))
-	Zoom(Amount)
-	redrawTimerStart()
+	if (event.deltaY < 0)
+		new ZoomAnimation(GetMousePos(event), 1.05)
+	else
+		new ZoomAnimation(GetMousePos(event), 0.95)
 }
 
-function TickZoom()
-{
-	if (ZoomTicks >= ZoomNumOfTicks)
-		return false
+// -- Zoom animation system
+const ZoomTotalTime = 0.3
+const ZoomMinimum = 0.2
+const ZoomMaximum = 32
+class ZoomAnimation extends AnimationInstance {
+	static instance = null;
 
-	var Amount = Math.pow(ZoomAmount, 1 / ((ZoomTicks + 1) * 2))
-	Zoom(Amount)
+	constructor(mousepos, amount) {
+		super();
+		if (ZoomAnimation.instance != null)
+			ZoomAnimation.instance.delete();
+		ZoomAnimation.instance = this;
 
-	ZoomTicks++
-	return true
+		this.ZoomAmount = amount;
+		this.ZoomMousePos = mousepos;
+
+		this.ZoomTime = 0
+		this.onTick(0);
+	}
+	onTick(timePassed) {
+		
+		var Amount = Math.pow(this.ZoomAmount, 1 / (this.ZoomTime * 20 + 1) );
+		var OldZoom = CameraZoom
+		CameraZoom *= Amount
+		CameraZoom = clamp(ZoomMinimum, CameraZoom, ZoomMaximum)
+
+		// Adjust Camera so mouse will still be pointing at the same pixel
+		CameraX = this.ZoomMousePos.X - (CameraZoom / OldZoom) * (this.ZoomMousePos.X - CameraX)
+		CameraY = this.ZoomMousePos.Y - (CameraZoom / OldZoom) * (this.ZoomMousePos.Y - CameraY)
+
+		MapImageDrawSize = 1024 * CameraZoom
+
+		this.ZoomTime += timePassed
+		clampCamera()
+	}
+	shouldDelete() {
+		return this.ZoomTime >= ZoomTotalTime || (MouseIsDown);
+	}
+	delete() {
+		this.ZoomTicks = 99999999;
+		ZoomAnimation.instance = null;
+    }
 }
 
-//Set tick number to something high so TickZoom will stop.
-function EndZoom()
-{
-	ZoomTicks = 10000000
-}
 
-const Zoom_Minimum = 0.2
-const Zoom_Maximum = 32
 
-function Zoom(Amount)
-{
-	var OldZoom = CameraZoom
-	CameraZoom *= Amount
-	CameraZoom = clamp(Zoom_Minimum, CameraZoom, Zoom_Maximum)
-
-	// Adjust Camera so mouse will still be pointing at the same pixel
-	CameraX = ZoomMousePos.X - (CameraZoom / OldZoom) * (ZoomMousePos.X - CameraX)
-	CameraY = ZoomMousePos.Y - (CameraZoom / OldZoom) * (ZoomMousePos.Y - CameraY)
-
-	MapImageDrawSize = 1024 * CameraZoom
-
-	clampCamera()
-	
-	redrawIfNotPlaying()
-}
 
 
 function clamp(min, X, max)

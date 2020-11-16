@@ -936,7 +936,7 @@ function getSquadName(team,squad)
 
 
 
-const TICKSPERSAVE = 250
+const TICKSPERSAVE = 150
 const TICKSJUMPMINIMUM = 350
 var LatestState = -1
 var isFastForwarding = false //Set to true to not do any UI updates when fast forwarding

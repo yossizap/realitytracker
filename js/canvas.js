@@ -174,13 +174,13 @@ function drawCanvas()
 	if (SelectedKill != SELECTED_NOTHING)
 		killLine_DrawSelected()
 		
-	drawAllHightlights()
 	
 	if (options_drawAllOrderIcons)
 		for (var index in AllSLOrders)
 			drawOrderIcon(AllSLOrders[index])
 
 
+	Animations.draw(Context);
 }
 
 // enum -> [icon, color]
@@ -772,39 +772,8 @@ function getStyle(Team, Squad)
 }
 
 
-
-//TODO rename this system to something more intuitive 
-//A List of functions that return a boolean stating whether or not an animation is playing. Function can also "tick" the animations
-var redrawNeededChecks = []
-var redrawTimer = null
-function redrawTimerStart()
-{
-	if (redrawTimer == null)
-	{
-		if (!isPlaying())
-			drawCanvas()
-		redrawTimer = setTimeout(redrawTimerTick, frameTime)
-	}
-}
-function redrawTimerTick()
-{
-	redrawTimer = null
-	var redrawNeeded = false
-	for (var i=0;i<redrawNeededChecks.length;i++)
-		if (redrawNeededChecks[i]())
-			redrawNeeded =true
-	
-	
-	if (redrawNeeded)
-		redrawTimer = setTimeout(redrawTimerTick, frameTime)
-		
-	//Redraw anyways to "reset" the canvas even when no animations are playing(draw without animations)
-	if (!isPlaying())
-		drawCanvas()
-}
-
 function redrawIfNotPlaying()
 {
-	if (!isPlaying() && redrawTimer==null)
+	if (!isPlaying() && !Animations.animationsPlaying())
 		drawCanvas()
 }
