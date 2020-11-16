@@ -683,8 +683,8 @@ function drawVehicle(i)
 
 	Context.save()
 	Context.translate(x, y)
-	Context.rotate(rot / 180 * Math.PI)
-	
+	if (!v.isUAVVehicle)
+		Context.rotate(rot / 180 * Math.PI)
 	Context.drawImage(v.mapImage[color], -11, -11, 22, 22)
 	Context.restore()
 

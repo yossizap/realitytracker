@@ -518,6 +518,7 @@ function VehicleAdd(FullMessage)
 	CurrentVehicle.maxHealth = FullMessage.getUint16(pos, true)
 	pos += 2
 
+	CurrentVehicle.isUAVVehicle = isUAVVehicle(CurrentVehicle.name)
 	CurrentVehicle.isClimbingVehicle = isClimbingVehicle(CurrentVehicle.name)
 	if (!CurrentVehicle.isClimbingVehicle)
 	{
@@ -1774,6 +1775,10 @@ function isFlyingVehicle(vehicleName)
 		vehicleName.includes("_jet_") ||
 		vehicleName.startsWith("spectator")
 }
+function isUAVVehicle(vehicleName) {
+	return vehicleName.includes("uav_") 
+}
+
 
 function isClimbingVehicle(vehicleName)
 {
