@@ -17,8 +17,8 @@ function onReset()
 
 	// Empty killLines 
 	killLines = []
-	
-	
+
+	gametimelasttime = NaN;
 	// redraw the map 
 	drawCanvas()
 }
@@ -71,13 +71,9 @@ function onLoadState()
 	//Update squad names
 	for (var team = 1;team<=2;team++)
 		for (var squad = 1;squad<=9;squad++)
-			$("#Squad" + team + squad + " thead td")[0].textContent = squad + ". " + getSquadName(team,squad)
-}
+			$("#Squad" + team + squad + " thead td")[0].textContent = squad + ". " + getSquadName(team, squad)
 
-// Different than onLoadState, load state is called when the state is set to the checkpoint, goTo is after it caught up to the target tick
-function onGoTo()
-{
-	
+	gametimelasttime = NaN;
 }
 
 // Called when vehicle's crew change

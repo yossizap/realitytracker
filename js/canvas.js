@@ -14,6 +14,8 @@ const Style_HealthBarWreck = "#eeee00"
 const Style_HealthBarRed = "red"
 
 
+
+
 function interpolate(Start, End)
 {
 	return Start * (1 - interpolation_CurrentAmount) + End * interpolation_CurrentAmount
@@ -108,11 +110,20 @@ var PlayerCircleSize = 8
 // A list of vehicles that has a player of the selected squad in. reset and filled every draw (TODO just set it every Update/Select instead?)
 var SquadVehicles
 
+
+var gametimepassed = 0;
+var gametimelasttime = NaN;
+
 function drawCanvas()
 {
 	if (!MapImageReady)
 		return
-	
+
+
+	var gametime = (Tick_Current + interpolation_CurrentAmount) * DemoTimePerTick;
+	gametimepassed = Math.max(0, (gametime - (isNaN(gametimelasttime) ? gametime : gametimelasttime)));
+	gametimelasttime = gametime;
+
 	//Reset canvas width and height (Efficient, only does actual changes if value differs)
 	Canvas.width = mapDiv.clientWidth
 	Canvas.height = mapDiv.clientHeight
@@ -270,7 +281,7 @@ var driverFOVArc_selected  = 0.15
 function drawPlayer(index)
 {
 	const p = AllPlayers[index]
-	if (p.isJoining || p.lastX == null) //Skip if joining or unknown pos
+	if (p.isJoining || p.ns_lastX == null) //Skip if joining or unknown pos
 		return
 	
 	var x = p.getCanvasX()
@@ -398,7 +409,7 @@ function drawPlayer_DrawAlive(p, x, y, rot)
 		
 	
 	if (options_health_players || HealthButtonDown)
-		drawHealthBar(p, x, y)
+		p.ns_healthRenderer.draw(x, y);
 
 	// Heading arrow
 	setTeamSquadColor(p.team, p.squad)
@@ -464,32 +475,68 @@ function drawPlayer_DrawHollowWithInnerStroke(p, x, y, OuterStrokeStyle, InnerSt
 
 const HEALTH_WRECK = -1
 const HEALTH_ERROR = -128
-function drawHealthBar(p, x, y)
-{
-	if (p.health == HEALTH_ERROR)
-		return
-	
-	const width = 24
-	const height = 5
-	const offsetX = -12
-	const offsetY = -15
-	
-	if (p.health == HEALTH_WRECK)
-	{
-		Context.fillStyle = Style_HealthBarWreck
-		Context.fillRect(x + offsetX, y + offsetY, width, height);
-	}
-	else
-	{
-		const greenWidth = width / p.maxHealth * p.health
-		const redWidth = width - greenWidth
+const DAMAGEINCOMING_PERCENT_PERSEC_CONST = 0.01
 
-		Context.fillStyle = Style_HealthBarGreen
-		Context.fillRect(x + offsetX, y + offsetY, greenWidth, height);
+const DAMAGEINCOMING_PERCENT_PERSEC_MUL = 3.3;
 
-		Context.fillStyle = Style_HealthBarRed
-		Context.fillRect(x + offsetX + greenWidth, y + offsetY, redWidth, height);
+class HealthRenderer {
+	constructor(object) {
+		this.reset(object);
 	}
+
+	reset(object) {
+		this.object = object;
+		this.incomingDamage = 0;
+	}
+
+	draw(x, y) {
+		const p = this.object;			
+
+		if (p.health == HEALTH_ERROR)
+			return
+
+		const width = 24
+		const height = 5
+		const offsetX = -12
+		const offsetY = -15
+
+		if (p.health == HEALTH_WRECK) {
+			Context.fillStyle = Style_HealthBarWreck
+			Context.fillRect(x + offsetX, y + offsetY, width, height);
+		}
+		else {
+			this.incomingDamage = Math.max(0, this.incomingDamage
+				- (gametimepassed * (DAMAGEINCOMING_PERCENT_PERSEC_CONST + this.incomingDamage * DAMAGEINCOMING_PERCENT_PERSEC_MUL)));
+
+
+			const greenWidth = width * p.health / p.maxHealth 		
+			const incomingDamageWidth = (width * this.incomingDamage)
+			const redWidth = width - greenWidth - incomingDamageWidth
+
+			var hx = x + offsetX
+			var hy = y + offsetY
+			Context.fillStyle = Style_HealthBarGreen
+			Context.fillRect(hx, hy, greenWidth, height);
+			hx += greenWidth;
+
+			Context.fillStyle = "white";
+			Context.fillRect(hx, hy, incomingDamageWidth, height);
+			hx += incomingDamageWidth;
+
+			Context.fillStyle = "#232323";
+			Context.fillRect(hx, hy, redWidth, height);
+		}
+	}
+
+
+	onDamage(previous, now) {
+		if (previous >= now) {
+			this.incomingDamage += (previous - now) / this.object.maxHealth;
+		}
+		else {
+			this.incomingDamage = 0;
+        }
+    }
 }
 
 
@@ -648,7 +695,7 @@ function drawVehicle(i)
 	}
 
 	if (options_health_vehicles || HealthButtonDown)
-		drawHealthBar(v, x, y)
+		v.ns_healthRenderer.draw(x, y);
 }
 
 function drawRally(i)
@@ -703,9 +750,9 @@ function drawProj(i)
 	const proj = AllProj[i]
 	
 	// Projectiles take a while to delete after hitting. Ignore fast projectiles when they stop moving
-	if (proj.isFast && Math.abs(proj.lastX - proj.X) < 10 
-					&& Math.abs(proj.lastY - proj.Y) < 10 
-					&& Math.abs(proj.lastZ - proj.Z) < 10)
+	if (proj.isFast && Math.abs(proj.ns_lastX - proj.X) < 10 
+					&& Math.abs(proj.ns_lastY - proj.Y) < 10 
+					&& Math.abs(proj.ns_lastZ - proj.Z) < 10)
 		return
 	
 	const x = proj.getCanvasX()

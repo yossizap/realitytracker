@@ -106,8 +106,8 @@ function MouseClick(event)
 	for (var I in AllPlayers)
 	{
 		var p = AllPlayers[I]
-		const x = interpolate(p.lastX, p.X)
-		const z = interpolate(p.lastZ, p.Z)
+		const x = p.getX();
+		const z = p.getZ();
 		if (p.isJoining)
 			continue
 		
@@ -121,8 +121,8 @@ function MouseClick(event)
 	for (var I in AllProj)
 	{
 		const p = AllProj[I]
-		const x = interpolate(p.lastX, p.X)
-		const z = interpolate(p.lastZ, p.Z)
+		const x = p.getX();
+		const z = p.getZ();
 		var dis = (Math.pow(XtoCanvas(x) - pos.X, 2) + Math.pow(YtoCanvas(z) - pos.Y, 2)) * 2 // less click priority than players
 		if (dis < minDis)
 		{

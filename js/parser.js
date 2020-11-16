@@ -124,34 +124,36 @@ class GameObject
 	getCanvasY() {
 		return YtoCanvas(this.getZ())
 	}
-	
+	onLoadState() {}
 }
 
 class InterpolatedGameObject extends GameObject
 {
 	constructor(X,Y,Z) {
 		super(X,Y,Z)
-		this.lastX = X
-		this.lastZ = Z
-		this.rotation = 0
-		this.lastRotation = 0
+		this.ns_lastX = X
+		this.ns_lastZ = Z
+		this.ns_lastRotation = 0
+		this.rotation = 0	
 	}
 	
 	getX() {
-		return interpolate(this.lastX, this.X);
+		return interpolate(this.ns_lastX, this.X);
 	}
 	getZ() {
-		return interpolate(this.lastZ, this.Z);
+		return interpolate(this.ns_lastZ, this.Z);
 	}
 	getRotation() {
-		return interpolateAngle(this.lastRotation, this.rotation);
+		return interpolateAngle(this.ns_lastRotation, this.rotation);
 	}
 	updateInterpHistory(){
-		this.lastX = this.X
-		this.lastZ = this.Z
-		this.lastRotation = this.rotation;
+		this.ns_lastX = this.X
+		this.ns_lastZ = this.Z
+		this.ns_lastRotation = this.rotation;
 	}
-	
+	onLoadState() {
+		this.updateInterpHistory();
+	}
 }
 
 
@@ -187,13 +189,18 @@ class PlayerObject extends InterpolatedGameObject
 
 		this.kitImage = icons[KitNameToImageDictionary["rifleman"]]
 
-
+		this.ns_healthRenderer = new HealthRenderer(this);
 		//Private data
 		this.hash = null
 		this.ip = null
 
 		AllPlayers[this.id] = this
 	}
+
+	onLoadState() {
+		super.onLoadState();
+		this.ns_healthRenderer = new HealthRenderer(this);
+    }
 }
 
 const PLAYERUPDATEFLAGS = {
@@ -282,7 +289,10 @@ function PlayerUpdate(FullMessage)
 
 		if (flags & PLAYERUPDATEFLAGS.HEALTH)
 		{
-			Player.health = FullMessage.getInt8(pos++, true);
+			const val = FullMessage.getInt8(pos++, true);
+			if (!isFastForwarding)
+				Player.ns_healthRenderer.onDamage(Player.health, val);
+			Player.health = val;
 		}
 
 		if (flags & PLAYERUPDATEFLAGS.SCORE)
@@ -364,10 +374,8 @@ function PlayerUpdate(FullMessage)
 
 		// Reset interpolation if alive changed
 		if (flags & PLAYERUPDATEFLAGS.ISALIVE)
-		{
-			Player.lastX = Player.X
-			Player.lastZ = Player.Z
-		}
+			Player.updateInterpHistory();
+		
 
 		// Call events for each player
 		if (flags & playerUpdate_StatusChange)
@@ -379,6 +387,7 @@ function PlayerUpdate(FullMessage)
 		// TODO get rid of this
 		if (flags & playerUpdate_SelectionInfoChange)
 			onPlayerSelectionInfoChange(id)
+
 	}
 
 }
@@ -472,8 +481,15 @@ class VehicleObject extends InterpolatedGameObject
 		
 		//No Update received for this vehicle yet
 		this.isNew = true
-		
+
+		this.ns_healthRenderer = new HealthRenderer(this);
+
 		AllVehicles[this.id] = this
+	}
+
+	onLoadState() {
+		super.onLoadState();
+		this.ns_healthRenderer = new HealthRenderer(this);
 	}
 }
 
@@ -557,16 +573,17 @@ function VehicleUpdate(FullMessage)
 
 		if (flags & VEHICLEUPDATEFLAGS.HEALTH)
 		{
-			CurrentVehicle.health = FullMessage.getInt16(pos, true)
+			const val = FullMessage.getInt16(pos, true);
+			if (!isFastForwarding)
+				CurrentVehicle.ns_healthRenderer.onDamage(CurrentVehicle.health, val);
+			CurrentVehicle.health = val;
 			pos += 2
 		}
 		
 		
-		if (isNaN(CurrentVehicle.lastX))
-		{
-			CurrentVehicle.lastX = CurrentVehicle.X
-			CurrentVehicle.lastZ = CurrentVehicle.Z
-		}
+		if (isNaN(CurrentVehicle.ns_lastX))
+			CurrentVehicle.updateInterpHistory();
+		
 		
 		// First update received for vehicle, do UI stuff
 		if (CurrentVehicle.isNew)
@@ -864,7 +881,7 @@ function ProjUpdate(FullMessage)
 		proj.Y = parsed[3]
 		proj.Z = parsed[4]
 		
-		proj.isFast = proj.isFast | (Math.pow(proj.X - proj.lastX, 2) + Math.pow(proj.Z - proj.lastZ, 2) > 1600 * DemoTimePerTick) // 40m/s
+		proj.isFast = proj.isFast | (Math.pow(proj.X - proj.ns_lastX, 2) + Math.pow(proj.Z - proj.ns_lastZ, 2) > 1600 * DemoTimePerTick) // 40m/s
 	}
 }
 
@@ -989,8 +1006,6 @@ function goTo(Tick_Target)
 	if (Tick_Current < Tick_Target) // If no updates are needed, the UI should be already updated from loading the state
 		Update() // Do the last update with isFastForwarding false to cause UI update 
 
-	onGoTo()
-
 	if (!isPlaying())
 		drawCanvas()
 }
@@ -1007,14 +1022,14 @@ function loadState(SavedTick)
 	}
 
 	const State = savedStates[SavedTick]
-	copyList(State.AllPlayers, AllPlayers)
-	copyList(State.AllVehicles, AllVehicles)
-	copyList(State.AllFobs, AllFobs)
-	copyList(State.AllRallies, AllRallies)
-	copyList(State.AllFlags, AllFlags)
-	copyList(State.AllCaches, AllCaches)
-	copyList(State.AllSLOrders, AllSLOrders)
-	copyList(State.AllProj, AllProj)
+	loadList(State.AllPlayers, AllPlayers)
+	loadList(State.AllVehicles, AllVehicles)
+	loadList(State.AllFobs, AllFobs)
+	loadList(State.AllRallies, AllRallies)
+	loadList(State.AllFlags, AllFlags)
+	loadList(State.AllCaches, AllCaches)
+	loadList(State.AllSLOrders, AllSLOrders)
+	loadList(State.AllProj, AllProj)
 	
 	SquadNames = JSON.parse(State.SquadNames)
 	
@@ -1044,14 +1059,14 @@ function saveState()
 	const state = {
 		SquadNames: JSON.stringify(SquadNames),
 		
-		AllPlayers: copyList(AllPlayers),
-		AllVehicles: copyList(AllVehicles),
-		AllFobs: copyList(AllFobs),
-		AllFlags:copyList(AllFlags),
-		AllCaches: copyList(AllCaches),
-		AllRallies: copyList(AllRallies),
-		AllSLOrders: copyList(AllSLOrders),
-		AllProj: copyList(AllProj),
+		AllPlayers: saveList(AllPlayers),
+		AllVehicles: saveList(AllVehicles),
+		AllFobs: saveList(AllFobs),
+		AllFlags: saveList(AllFlags),
+		AllCaches: saveList(AllCaches),
+		AllRallies: saveList(AllRallies),
+		AllSLOrders: saveList(AllSLOrders),
+		AllProj: saveList(AllProj),
 		
 		tickets1: tickets1,
 		tickets2: tickets2,
@@ -1768,14 +1783,20 @@ function isClimbingVehicle(vehicleName)
 
 }
 
-function copyList(Source, Target)
+
+function saveList(Source) {
+	var res = {}
+	for (var objid in Source) {
+		res[objid] = shallowCopy(Source[objid])
+	}
+	return res;
+}
+
+function loadList(Source, Target)
 {
-	if (!Target)
-		Target = {}
-	
-	for (var field in Target)
-		if (!(field in Source))
-			delete Target[field]
+	for (var objid in Target)
+		if (!(objid in Source))
+			delete Target[objid]
 	
 	
 	for (var field in Source)
@@ -1784,6 +1805,8 @@ function copyList(Source, Target)
 			shallowCopy(Source[field], Target[field])
 		else
 			Target[field] = shallowCopy(Source[field])
+
+		Target[field].onLoadState()
 	}
 	
 	return Target
@@ -1794,8 +1817,12 @@ function shallowCopy(Source, Target)
 	if (!Target)
 		Target = Object.create(Source.__proto__)
 	
-	for (var field in Source)
+	for (var field in Source) {
+		if (field.startsWith("ns_"))
+			continue;
 		Target[field] = Source[field]
+    }
+		
 	
 	return Target;
 }
