@@ -1,6 +1,5 @@
-$(() => $("#serverinfo").dialog(
+$(() => $("#serverinfoContainer").dialog(
 {
-	close: selection_DeselectCurrent,
 	containment: "#mainContainer",
 	autoOpen: false,
 	width: 500,

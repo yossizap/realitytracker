@@ -565,6 +565,7 @@ function writeServerInfoTable()
 	serverInfoTableAddLine("Map name", MapName)
 	serverInfoTableAddLine("Map mode", GameMode)
 	serverInfoTableAddLine("Map layer", Layer)
+	serverInfoTableAddLine("Round length", roundLength)
 }
 
 function showDemoSelectionInterface()
