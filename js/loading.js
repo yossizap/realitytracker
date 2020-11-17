@@ -264,8 +264,9 @@ function loadDemo(link, CredsNeeded, forceCorsProxy)
 	{
 		var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname; //get base URL
 		newurl += '?demo=' + demoLink  //set demo link
-		if (getUrlParameter("t"))
-			newurl += '&t=' + getUrlParameter("t")  //set timestamp
+		for (var arg of ["t", "cx", "cy", "czoom"])
+			if (getUrlParameter(arg))
+				newurl += '&' + arg + '=' + getUrlParameter(arg)  //set timestamp
 		window.history.pushState({path:newurl},'',newurl);
 	}
 	
@@ -546,6 +547,14 @@ function stage4LoadingFininshed()
 		if (tick != -1)
 			goTo(tick)
 	}
+	if (getUrlParameter("cx") && getUrlParameter("cy")) {
+		const cx = parseFloat(getUrlParameter("cx"));
+		const cy = parseFloat(getUrlParameter("cy"));
+		const czoom = parseFloat(getUrlParameter("czoom"));
+		if (!isNaN(cx) && !isNaN(cy))
+			setCanvasCenterWithZoom(cx, cy, isNaN(czoom) ? 1 : czoom);
+	}
+
 }
 
 function writeServerInfoTable()

@@ -110,6 +110,9 @@ function copyTrackerLink() {
 	var u = window.location.protocol + "//" + window.location.host + window.location.pathname; 
 	u += '?demo=' + demoLink;
 	u += '&t=' + getTimeStringOfTick(Tick_Current);
+	u += '&cx=' + parseFloat(getCanvasCenter()[0]).toFixed(2);
+	u += '&cy=' + parseFloat(getCanvasCenter()[1]).toFixed(2);
+	u += '&czoom=' + parseFloat(CameraZoom).toFixed(2);
 	copyTextToClipboard(u);
 }
 

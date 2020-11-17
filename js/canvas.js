@@ -97,6 +97,23 @@ function lengthtoCanvas(r)
 }
 
 
+function XtoWorld(x) {
+	x -= CameraX;
+	x /= CameraZoom;
+	x -= 512;
+	x *= MapSize;
+
+	return x;
+}
+function YtoWorld(y) {
+	y -= CameraY;
+	y /= CameraZoom;
+	y -= 512;
+	y *= -MapSize;
+
+	return y;
+}
+
 // canvas element
 var Canvas
 // the canvas' context
@@ -824,4 +841,26 @@ function redrawIfNotPlaying()
 {
 	if (!isPlaying() && !Animations.animationsPlaying())
 		drawCanvas()
+}
+
+
+function getCanvasCenter() {
+	const x = XtoWorld(Canvas.width / 2);
+	const y = YtoWorld(Canvas.height / 2);
+	return [x, y];
+}
+
+
+function setCanvasCenterWithZoom(x, y, zoom) {
+	CameraZoom = zoom;
+	MapImageDrawSize = 1024 * CameraZoom
+
+	CameraX = 0;
+	CameraY = 0;
+	parseFloat("123.456").toFixed(2);
+
+	CameraX = -XtoCanvas(x) + Canvas.width / 2
+	CameraY = -YtoCanvas(y) + Canvas.height / 2
+
+	drawCanvas();
 }
