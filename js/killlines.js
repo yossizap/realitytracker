@@ -85,25 +85,28 @@ function drawArrow(x1, x2, y1, y2, Team, Squad)
 	const xnorm = xdirection / size
 	const ynorm = ydirection / size
 	
-	const xbefore = x2 - xnorm * 20
-	const ybefore = y2 - ynorm * 20
-	
+	const xbefore = x2 - xnorm * 25
+	const ybefore = y2 - ynorm * 25
+
+	const styleouter = getStyle(Team, Squad);
+	const styleinner = (Team == 1) ? Style_RedTeam : Style_BlueTeam;
+
 	Context.moveTo(x1, y1);
 	Context.lineTo(xbefore, ybefore);
 	
-	Context.strokeStyle = getStyle(Team, Squad)
-	Context.lineWidth = 7;
+	Context.strokeStyle = styleouter
+	Context.lineWidth = 6;
 	Context.stroke()
 	
-	Context.strokeStyle = (Team == 1) ? Style_RedTeam : Style_BlueTeam
-	Context.lineWidth = 4;
+	Context.strokeStyle = styleinner
+	Context.lineWidth = 2;
 	Context.stroke()
 	
-	Context.fillStyle = Context.strokeStyle
-	const cos = Math.cos(Math.PI / 24) 
-	const sin = Math.sin(Math.PI / 24)
-	const xnormScaled = xnorm * 20
-	const ynormScaled = ynorm * 20
+	
+	const cos = Math.cos(Math.PI / 18) 
+	const sin = Math.sin(Math.PI / 18)
+	const xnormScaled = xnorm * 25
+	const ynormScaled = ynorm * 25
 	
 	const trianglex1 = x2 - (cos * xnormScaled + sin * ynormScaled)
 	const triangley1 = y2 - (-sin * xnormScaled + cos * ynormScaled)
@@ -115,7 +118,8 @@ function drawArrow(x1, x2, y1, y2, Team, Squad)
 	Context.lineTo(trianglex1, triangley1);
 	Context.lineTo(trianglex2, triangley2);
 	Context.closePath()
+
+	Context.fillStyle = styleinner
 	Context.fill()
-	
-	
+
 }

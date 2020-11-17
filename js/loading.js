@@ -270,9 +270,14 @@ function loadDemo(link, CredsNeeded, forceCorsProxy)
 	
 	var req = new XMLHttpRequest();
 	req.open('GET', link);
-	
 	req.withCredentials = CredsNeeded
 	req.responseType = "arraybuffer";
+
+	// Required for firefox?
+	if (forceCorsProxy)
+		req.setRequestHeader('X-Requested-With', 'XMLHttpRequest') 
+	///
+
 	req.onload = () =>
 	{
 	
@@ -312,7 +317,6 @@ function loadDemo(link, CredsNeeded, forceCorsProxy)
 		if (!forceCorsProxy) {
 			// Due to security reasons, its impossible to tell if network failure was due to CORS.
 			console.log("Network error, retrying with cors proxy")
-
 			setLoadingOverlayText("Error downloading demo file, retrying with CORS proxy...")
 
 			// never do creds with cors proxy, they strip headers anyways
