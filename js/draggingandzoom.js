@@ -173,7 +173,7 @@ function doubleclick_Clear()
 
 function Wheel(event)
 {
-	if (MouseIsDown)
+	if (MouseIsDown || event.ctrlKey)
 		return;
 
 	if (event.deltaY < 0)
