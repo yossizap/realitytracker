@@ -240,17 +240,19 @@ function loadDemo(link, CredsNeeded, forceCorsProxy)
 {
 	if (link == "")
 		return false
+
 	
 	//Guarantee that link will use the same protocol as the window
 	// (if it fails its probably a relative path)
-	if (window.location.protocol != "file:") {
-		try {
-			var url = new URL(link);
-
+	var originalProtocol = "https:"; 
+	try {
+		var url = new URL(link);
+		originalProtocol = url.protocol;
+		if (window.location.protocol != "file:")
 			url.protocol = window.location.protocol;
-			link = url.href;
-		} catch (err) { }
-	}
+		link = url.href;
+	} catch (err) { }
+	
 
 	if (forceCorsProxy)
 		link = CORS_PROXY + link
@@ -318,6 +320,13 @@ function loadDemo(link, CredsNeeded, forceCorsProxy)
 			// Due to security reasons, its impossible to tell if network failure was due to CORS.
 			console.log("Network error, retrying with cors proxy")
 			setLoadingOverlayText("Error downloading demo file, retrying with CORS proxy...")
+
+			// Restore protocol, cors-proxy is HTTPs and target may require HTTP
+			try {
+				var url = new URL(link);
+				url.protocol = originalProtocol;
+				link = url.href;
+			} catch (err) { }
 
 			// never do creds with cors proxy, they strip headers anyways
 			return loadDemo(link, false, true);
