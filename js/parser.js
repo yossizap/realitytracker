@@ -240,6 +240,7 @@ const playerUpdate_TeamOrSquadChange =
 // When to rewrite selection
 const playerUpdate_SelectionInfoChange = 
 	playerUpdate_StatusChange +
+	PLAYERUPDATEFLAGS.HEALTH
 	PLAYERUPDATEFLAGS.POSITION
 
 
@@ -270,7 +271,7 @@ function PlayerUpdate(FullMessage)
 		if (flags & PLAYERUPDATEFLAGS.VEHICLE)
 		{
 			RemovePlayerFromVehicle(id)
-			onVehicleCrewChange(Player.vehicleid)
+			onVehicleDataChange(Player.vehicleid)
 			Player.vehicleid = FullMessage.getInt16(pos, true)
 			pos += 2
 			if (Player.vehicleid >= 0)
@@ -283,7 +284,7 @@ function PlayerUpdate(FullMessage)
 			}
 
 			AddPlayerToVehicle(id)
-			onVehicleCrewChange(Player.vehicleid)
+			onVehicleDataChange(Player.vehicleid)
 			onPlayerVehicleChange(id)
 		}
 
@@ -423,7 +424,7 @@ function PlayerRemove(FullMessage)
 		const id = parsed[0]
 		
 		RemovePlayerFromVehicle(id)
-		onVehicleCrewChange(AllPlayers[id].vehicleid, id)
+		onVehicleDataChange(AllPlayers[id].vehicleid, id)
 
 		onPlayerLeave(id)
 		delete AllPlayers[id]
@@ -579,6 +580,8 @@ function VehicleUpdate(FullMessage)
 				CurrentVehicle.ns_healthRenderer.onDamage(CurrentVehicle.health, val);
 			CurrentVehicle.health = val;
 			pos += 2
+
+			onVehicleDataChange(id)
 		}
 		
 		

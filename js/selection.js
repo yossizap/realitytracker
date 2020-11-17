@@ -125,7 +125,7 @@ function selection_SelectVehicle(i)
 	if (v.Passengers.size == 0)
 		console.log("Vehicle " + i + " is empty, but was selected")
 	else
-		selection_SelectPlayer(v.Passengers.values().next().value)
+		selection_SelectPlayer(v.Passengers.values().next().value, true)
 }
 
 
@@ -223,6 +223,8 @@ function selection_UpdateInformationBox()
 		div.innerHTML += "<br>" + escapeHtml(p.name)
 		div.appendChild(p.kitImage.cloneNode(false))
 		div.innerHTML += "<br>Height: " + p.Y	
+		if (p.health > 0) 
+			div.innerHTML += "<br>Health: " + p.health
 		
 		
 		if (p.team == 1)

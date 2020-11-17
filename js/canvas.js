@@ -505,8 +505,9 @@ class HealthRenderer {
 			Context.fillRect(x + offsetX, y + offsetY, width, height);
 		}
 		else {
-			this.incomingDamage = Math.max(0, this.incomingDamage
-				- (gametimepassed * (DAMAGEINCOMING_PERCENT_PERSEC_CONST + this.incomingDamage * DAMAGEINCOMING_PERCENT_PERSEC_MUL)));
+			if (this.incomingDamage > 0)
+				this.incomingDamage = Math.max(0, this.incomingDamage
+					- (gametimepassed * (DAMAGEINCOMING_PERCENT_PERSEC_CONST + this.incomingDamage * DAMAGEINCOMING_PERCENT_PERSEC_MUL)));
 
 
 			const greenWidth = width * p.health / p.maxHealth 		

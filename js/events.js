@@ -76,7 +76,7 @@ function onLoadState()
 }
 
 // Called when vehicle's crew change
-function onVehicleCrewChange(vehicleid)
+function onVehicleDataChange(vehicleid)
 {
 	if (vehicleid in vehicleTables)
 		vehicleTable_Update(vehicleid)

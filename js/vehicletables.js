@@ -59,10 +59,13 @@ function vehicleTable_Update(i)
 
 	$(vehicleTables[i]).find("tr:gt(0)").remove() //remove all rows (except the header)
 
-	var row = 1
+	var healthcell = t.insertRow(1).insertCell(0);
+	healthcell.innerHTML = v.health + "/" + v.maxHealth;
+	healthcell.colSpan = 2
+
+	var row = 2
 
 	// Go over the list 3 times
-	
 	//Find driver, Find gunners first, then passnegers
 	for (var j = 0; j <= 2; j++)
 		v.Passengers.forEach((i) => 
@@ -85,8 +88,6 @@ function vehicleTable_Update(i)
 function vehicleTable_AddPlayer(table, vehicle, player, rownum)
 {
 	var row = table.insertRow(rownum)
-	row.insertCell(0)
-	row.insertCell(1)
 
 	var seatName = player.vehicleSeatName
 	// See if we can remove vehiclename from seat name
