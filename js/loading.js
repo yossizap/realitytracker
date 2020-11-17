@@ -523,6 +523,9 @@ function stage4LoadingFininshed()
 	
 	//Draw the canvas for the first time
 	drawCanvas()
+
+	// Chrome hack: draw again a second later, its doing some async caching and images are not ready
+	setTimeout(drawCanvas, 1000);
 	
 	//Reset speed to 1
 	setSpeed(1)
