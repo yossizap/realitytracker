@@ -205,12 +205,13 @@ function createColoredMapIcons()
 }
 
 //Called when all icons are done loading. Now the demo needs to be selected or loaded.
-function stage1LoadingFininshed()
-{
+function stage1LoadingFininshed() {
 	createColoredMapIcons()
-	
-	if (getUrlParameter("demo"))
+
+	if (getUrlParameter("demo")) { 
+		setLoadingOverlayText("Preparing to load demo...")
 		loadDemo(getUrlParameter("demo"), false)
+	}
 	else
 	{
 		showDemoSelectionInterface()
@@ -231,29 +232,42 @@ function loadLiveDemo(IP,Port,Username,Password)
 	//Wait for callback from onConnect and go to stage3 finished
 }
 
+const CORS_PROXY = "https://cors-anywhere.herokuapp.com/"
+
+var demoLink = null;
 //LoadDemo from URL
-function loadDemo(link, CredsNeeded)
+function loadDemo(link, CredsNeeded, forceCorsProxy)
 {
 	if (link == "")
 		return false
 	
 	//Guarantee that link will use the same protocol as the window
 	// (if it fails its probably a relative path)
-	try {
-		var url = new URL(link);
-		url.protocol = window.location.protocol;
-		link = url.href;
-	} catch (err) {}
-	
+	if (window.location.protocol != "file:") {
+		try {
+			var url = new URL(link);
+
+			url.protocol = window.location.protocol;
+			link = url.href;
+		} catch (err) { }
+	}
+
+	if (forceCorsProxy)
+		link = CORS_PROXY + link
+
+
+	demoLink = link;
 	//Manually set query string when loading from a URL
 	if (history.pushState) 
 	{
 		var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname; //get base URL
-		newurl += '?demo='+link  //set demo link
+		newurl += '?demo=' + demoLink  //set demo link
+		if (getUrlParameter("t"))
+			newurl += '&t=' + getUrlParameter("t")  //set timestamp
 		window.history.pushState({path:newurl},'',newurl);
 	}
 	
-	setLoadingOverlayText("Preparing to load demo...")
+	
 	var req = new XMLHttpRequest();
 	req.open('GET', link);
 	
@@ -295,7 +309,18 @@ function loadDemo(link, CredsNeeded)
 	}
 	req.onerror= e => 
 	{
-		setLoadingOverlayText("Error downloading demo file. " + e)
+		if (!forceCorsProxy) {
+			// Due to security reasons, its impossible to tell if network failure was due to CORS.
+			console.log("Network error, retrying with cors proxy")
+
+			setLoadingOverlayText("Error downloading demo file, retrying with CORS proxy...")
+
+			// never do creds with cors proxy, they strip headers anyways
+			return loadDemo(link, false, true);
+		} else {
+			setLoadingOverlayText("Network error downloading demo file.")
+			console.log(e)
+        }
 	}
 	
 	req.send();
