@@ -248,7 +248,7 @@ function loadDemo(link, CredsNeeded, forceCorsProxy)
 	try {
 		var url = new URL(link);
 		originalProtocol = url.protocol;
-		if (window.location.protocol != "file:")
+		if (window.location.protocol != "file:" && !forceCorsProxy)
 			url.protocol = window.location.protocol;
 		link = url.href;
 	} catch (err) { }
