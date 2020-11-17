@@ -102,6 +102,25 @@ var viewerScripts = {
 	},
 }
 
+
+function copyTrackerLink() {
+	if (demoLink == null)
+		return;
+
+	var u = window.location.protocol + "//" + window.location.host + window.location.pathname; 
+	u += '?demo=' + demoLink;
+	u += '&t=' + getTimeStringOfTick(Tick_Current);
+	copyTextToClipboard(u);
+}
+
+function copyTextToClipboard(text) {
+	if (!navigator.clipboard) {
+		console.log("Browser does not support modern clipboard API")
+		return;
+	}
+	navigator.clipboard.writeText(text);
+}
+
 // Update location hash
 // Only update once per X seconds, every tick is too expensive.
 // var hashUpdatedRecently = false

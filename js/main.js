@@ -244,7 +244,7 @@ function updateHeader()
 }
 
 function getTimeInSecondsFromString(time) {
-	const re = /(\d{0,2})[hH]?(\d{0,2})[Mm]?(\d{0,2})[Ss]?/
+	const re = /(\d{0,2}):(\d{0,2}):(\d{0,2})/
 	const match = re.exec(time)
 	if (match)
 		return (match[1] * 3600) + (match[2] * 60) + (match[3] * 1)

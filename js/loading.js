@@ -344,6 +344,8 @@ function loadDemoFromFile()
 		stage3LoadingFininshed()
 	}
 	reader.readAsArrayBuffer($("#demoFileSelection")[0].files[0])
+
+	$("#copyLink")[0].style["cursor"] = "not-allowed";
 }
 
 
