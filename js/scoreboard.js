@@ -24,6 +24,7 @@ function playerRow_Create(id)
 	var row = document.createElement("TR")
 
 	row.setAttribute("playerid", id);
+	row.setAttribute("playername", AllPlayers[id].name);
 
 	for (var i = 0; i < 4; i++)
 		row.insertCell(i)

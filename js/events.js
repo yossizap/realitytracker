@@ -29,9 +29,8 @@ function onLoadState()
 {
 	// remove/add row data for players that disconnected/connected.
 
-	// TODO compare by playername instead, as it creates conflicts, do it when redoing the playerrow stuff properly.
 	for (var i in playerRows)
-		if (!(i in AllPlayers))
+		if (!(i in AllPlayers) || playerRows[i].getAttribute("playername") != AllPlayers[i].name )
 			playerRow_Remove(i)
 
 	for (var i in AllPlayers)
