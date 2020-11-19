@@ -877,8 +877,9 @@ function setCanvasCenterWithZoom(x, y, zoom) {
 	CameraX = 0;
 	CameraY = 0;
 
-	CameraX = -XtoCanvas(x) + Canvas.width / 2
-	CameraY = -YtoCanvas(y) + Canvas.height / 2
+
+	CameraX = (-XtoCanvas(x) + (Canvas.width / 2) / options_canvasScale)
+	CameraY = (-YtoCanvas(y) + (Canvas.height / 2) / options_canvasScale)
 
 	drawCanvas();
 }
