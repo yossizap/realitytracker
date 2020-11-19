@@ -284,9 +284,9 @@ function checkboxClicked(Checkbox)
 }
 
 // Called when an options checkbox is clicked.
-function changeSetting(settingName, bool)
+function changeSetting(settingName, val)
 {
-	window[settingName] = bool
+	window[settingName] = val
 	localStorage[settingName] = JSON.stringify(window[settingName])
 
 	redrawIfNotPlaying()

@@ -221,7 +221,7 @@ function selection_UpdateInformationBox()
 				div.innerHTML += " Leader"
 		} 
 		div.innerHTML += "<br>" + escapeHtml(p.name)
-		div.appendChild(p.kitImage.cloneNode(false))
+		div.appendChild(p.ns_kitImage.cloneNode(false))
 		div.innerHTML += "<br>Height: " + p.Y	
 		if (p.health > 0) 
 			div.innerHTML += "<br>Health: " + p.health

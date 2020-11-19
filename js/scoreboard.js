@@ -63,7 +63,7 @@ function playerRow_Update(id)
 
 	row.cells[2].textContent = ""
 	if (p.kit != "")
-		row.cells[2].appendChild(p.kitImage.cloneNode(false))
+		row.cells[2].appendChild(p.ns_kitImage.cloneNode(false))
 
 	row.cells[3].textContent = ""
 	if (p.vehicleid >= 0 && (p.vehicleid in AllVehicles))

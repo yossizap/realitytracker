@@ -128,6 +128,22 @@ var PlayerCircleSize = 8
 var SquadVehicles
 
 
+var options_canvasScale = 1;
+function UIScaleChange() {
+
+	const oldscale = options_canvasScale;
+	const scale = $("#options_canvasScale")[0].value;
+	changeSetting("options_canvasScale", scale)
+
+
+
+	CameraX = CameraX * oldscale / scale
+	CameraY = CameraY * oldscale / scale
+
+	redrawIfNotPlaying();
+}
+
+
 var gametimepassed = 0;
 var gametimelasttime = NaN;
 
@@ -144,6 +160,7 @@ function drawCanvas()
 	//Reset canvas width and height (Efficient, only does actual changes if value differs)
 	Canvas.width = mapDiv.clientWidth
 	Canvas.height = mapDiv.clientHeight
+	Context.scale(options_canvasScale, options_canvasScale);
 
 	//Clear canvas, reapply new background
 	Context.clearRect(0, 0, Canvas.width, Canvas.height);
@@ -388,7 +405,7 @@ function drawPlayer_DrawSLNumber(p, x, y)
 
 function drawPlayer_DrawKit(p, x, y)
 {
-	Context.drawImage(p.kitImage, x - 7, y - 7, 14, 14)
+	Context.drawImage(p.ns_kitImage, x - 7, y - 7, 14, 14)
 }
 
 function drawPlayer_DrawDead(p, x, y)
@@ -516,6 +533,7 @@ class HealthRenderer {
 		const height = 5
 		const offsetX = -12
 		const offsetY = -15
+		const maxhealth = (p instanceof PlayerObject) ? 100 : p.maxHealth
 
 		if (p.health == HEALTH_WRECK) {
 			Context.fillStyle = Style_HealthBarWreck
@@ -527,7 +545,7 @@ class HealthRenderer {
 					- (gametimepassed * (DAMAGEINCOMING_PERCENT_PERSEC_CONST + this.incomingDamage * DAMAGEINCOMING_PERCENT_PERSEC_MUL)));
 
 
-			const greenWidth = width * p.health / p.maxHealth 		
+			const greenWidth = width * p.health / maxhealth 		
 			const incomingDamageWidth = (width * this.incomingDamage)
 			const redWidth = width - greenWidth - incomingDamageWidth
 
@@ -547,9 +565,10 @@ class HealthRenderer {
 	}
 
 
-	onDamage(previous, now) {
+	onDamage(obj, previous, now) {
+		const maxhealth = (obj instanceof PlayerObject) ? 100 : obj.maxHealth
 		if (previous >= now) {
-			this.incomingDamage += (previous - now) / this.object.maxHealth;
+			this.incomingDamage += (previous - now) / maxhealth;
 		}
 		else {
 			this.incomingDamage = 0;
@@ -768,7 +787,7 @@ function drawProj(i)
 	const proj = AllProj[i]
 	
 	// Projectiles take a while to delete after hitting. Ignore fast projectiles when they stop moving
-	if (proj.isFast && Math.abs(proj.ns_lastX - proj.X) < 10 
+	if (proj.ns_isFast && Math.abs(proj.ns_lastX - proj.X) < 10 
 					&& Math.abs(proj.ns_lastY - proj.Y) < 10 
 					&& Math.abs(proj.ns_lastZ - proj.Z) < 10)
 		return
@@ -792,14 +811,14 @@ function drawProj(i)
 	}
 	
 	
-	if (proj.icon != null) 
+	if (proj.ns_icon != null) 
 	{
 		Context.save()
 		
 		Context.translate(x, y)
-		if (proj.shouldRotate)
+		if (proj.ns_shouldRotate)
 			Context.rotate(proj.rotation / 180 * Math.PI)
-		Context.drawImage(proj.icon[color], -8, -8) 
+		Context.drawImage(proj.ns_icon[color], -8, -8) 
 		
 		Context.restore()
 	}
@@ -857,7 +876,6 @@ function setCanvasCenterWithZoom(x, y, zoom) {
 
 	CameraX = 0;
 	CameraY = 0;
-	parseFloat("123.456").toFixed(2);
 
 	CameraX = -XtoCanvas(x) + Canvas.width / 2
 	CameraY = -YtoCanvas(y) + Canvas.height / 2

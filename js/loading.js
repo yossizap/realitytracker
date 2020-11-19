@@ -700,9 +700,15 @@ function loadOptions()
 	for (var Name in localStorage) 
 		if (Name.startsWith("options_"))
 		{
+			
 			changeSetting(Name, JSON.parse(localStorage[Name]))
 			if($("input[value='"+Name+"']")[0])
-				$("input[value='"+Name+"']")[0].checked = window[Name]
+				$("input[value='" + Name + "']")[0].checked = window[Name]
+
+			// TODO set by input type - terrible hack here
+			if ($("input[id='" + Name + "']")[0])
+				$("input[id='" + Name + "']")[0].value = window[Name]
+
 		}
 }
 

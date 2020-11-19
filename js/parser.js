@@ -183,11 +183,10 @@ class PlayerObject extends InterpolatedGameObject
 		this.kit = ""
 
 		this.health = 0
-		this.maxHealth = 100
 
 		this.rotation = 0
 
-		this.kitImage = icons[KitNameToImageDictionary["rifleman"]]
+		this.ns_kitImage = icons[KitNameToImageDictionary["rifleman"]]
 
 		this.ns_healthRenderer = new HealthRenderer(this);
 		//Private data
@@ -200,7 +199,19 @@ class PlayerObject extends InterpolatedGameObject
 	onLoadState() {
 		super.onLoadState();
 		this.ns_healthRenderer = new HealthRenderer(this);
+		this.setKitImage();
+		
+	}
+	setKitImage() {
+		if (this.kit != "") {
+			var KitSubName = this.kit.split("_")[1]
+			if (KitSubName in KitNameToImageDictionary && KitNameToImageDictionary[KitSubName] in icons)
+				this.ns_kitImage = icons[KitNameToImageDictionary[KitSubName]]
+			else
+				console.log("Parser: unknown kit name " + Player.kit)
+		}
     }
+
 }
 
 const PLAYERUPDATEFLAGS = {
@@ -292,7 +303,7 @@ function PlayerUpdate(FullMessage)
 		{
 			const val = FullMessage.getInt8(pos++, true);
 			if (!isFastForwarding)
-				Player.ns_healthRenderer.onDamage(Player.health, val);
+				Player.ns_healthRenderer.onDamage(Player, Player.health, val);
 			Player.health = val;
 		}
 
@@ -358,15 +369,7 @@ function PlayerUpdate(FullMessage)
 		{
 			Player.kit = getString(FullMessage, pos)
 			pos += Player.kit.length + 1
-			
-			if (Player.kit != "")
-			{
-				var KitSubName = Player.kit.split("_")[1]
-				if (KitSubName in KitNameToImageDictionary && KitNameToImageDictionary[KitSubName] in icons)
-					Player.kitImage = icons[KitNameToImageDictionary[KitSubName]]
-				else
-					console.log("Parser: unknown kit name " + Player.kit)
-			}
+			Player.setKitImage();
 		}
 
 		// Stop before the events calling if doing initial parse
@@ -488,6 +491,7 @@ class VehicleObject extends InterpolatedGameObject
 		AllVehicles[this.id] = this
 	}
 
+
 	onLoadState() {
 		super.onLoadState();
 		this.ns_healthRenderer = new HealthRenderer(this);
@@ -577,7 +581,7 @@ function VehicleUpdate(FullMessage)
 		{
 			const val = FullMessage.getInt16(pos, true);
 			if (!isFastForwarding)
-				CurrentVehicle.ns_healthRenderer.onDamage(CurrentVehicle.health, val);
+				CurrentVehicle.ns_healthRenderer.onDamage(CurrentVehicle, CurrentVehicle.health, val);
 			CurrentVehicle.health = val;
 			pos += 2
 
@@ -859,12 +863,23 @@ class ProjObject extends InterpolatedGameObject
 		this.player = AllPlayers[playerid]
 		this.team = this.player ? this.player.team : 1 // so if player disconnects while projectile in air we still have team.
 		
-		this.icon = coloredIcons[ProjectileTypeToImageName[type]]
-		this.shouldRotate = ProjectileTypeShouldRotate[type]
-		this.isFast = false
 		
 		AllProj[id] = this
+		this.initializeNoState();
 	}
+
+	initializeNoState() {
+		this.ns_icon = coloredIcons[ProjectileTypeToImageName[this.type]]
+		this.ns_shouldRotate = ProjectileTypeShouldRotate[this.type]
+		this.ns_isFast = false
+	}
+
+	onLoadState() {
+		super.onLoadState();
+		this.initializeNoState();
+	}
+
+
 }
 
 function ProjUpdate(FullMessage) 
@@ -885,7 +900,7 @@ function ProjUpdate(FullMessage)
 		proj.Y = parsed[3]
 		proj.Z = parsed[4]
 		
-		proj.isFast = proj.isFast | (Math.pow(proj.X - proj.ns_lastX, 2) + Math.pow(proj.Z - proj.ns_lastZ, 2) > 1600 * DemoTimePerTick) // 40m/s
+		proj.ns_isFast = proj.ns_isFast | (Math.pow(proj.X - proj.ns_lastX, 2) + Math.pow(proj.Z - proj.ns_lastZ, 2) > 1600 * DemoTimePerTick) // 40m/s
 	}
 }
 
@@ -957,7 +972,7 @@ function getSquadName(team,squad)
 
 
 
-const TICKSPERSAVE = 150
+var TICKSPERSAVE = 100
 const TICKSJUMPMINIMUM = 350
 var LatestState = -1
 var isFastForwarding = false //Set to true to not do any UI updates when fast forwarding

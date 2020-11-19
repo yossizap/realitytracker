@@ -32,8 +32,8 @@ function GetMousePos(event)
 	var rect = Canvas.getBoundingClientRect()
 
 	return {
-		X: event.clientX - rect.left,
-		Y: event.clientY - rect.top
+		X: (event.clientX - rect.left) / options_canvasScale,
+		Y: (event.clientY - rect.top) / options_canvasScale
 	};
 }
 
@@ -73,10 +73,9 @@ function MouseMove(event)
 
 function clampCamera()
 {
-	// 350 pixels safe space
-	var maxh = Canvas.height - 350
-	var maxw = Canvas.width - 350
-	var min = 350 - MapImageDrawSize
+	var maxh = (Canvas.height - 200) / options_canvasScale
+	var maxw = (Canvas.width - 200) / options_canvasScale
+	var min = (200 - MapImageDrawSize)
 	CameraX = clamp(min, CameraX, maxw)
 	CameraY = clamp(min, CameraY, maxh)
 }
