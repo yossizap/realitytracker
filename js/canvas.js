@@ -136,9 +136,11 @@ function UIScaleChange() {
 	changeSetting("options_canvasScale", scale)
 
 
+	const halfcw = Canvas.clientWidth / 2
+	const halfch = Canvas.clientHeight / 2 
 
-	CameraX = CameraX * oldscale / scale
-	CameraY = CameraY * oldscale / scale
+	CameraX = CameraX - (halfcw / oldscale) + (halfcw / scale);
+	CameraY = CameraY - (halfch / oldscale) + (halfch / scale);
 
 	redrawIfNotPlaying();
 }
