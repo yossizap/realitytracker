@@ -131,18 +131,13 @@ var SquadVehicles
 var options_canvasScale = 1;
 function UIScaleChange() {
 
+	const [x, y] = getCanvasCenter();
 	const oldscale = options_canvasScale;
 	const scale = $("#options_canvasScale")[0].value;
 	changeSetting("options_canvasScale", scale)
 
 
-	const halfcw = Canvas.clientWidth / 2
-	const halfch = Canvas.clientHeight / 2 
-
-	CameraX = CameraX - (halfcw / oldscale) + (halfcw / scale);
-	CameraY = CameraY - (halfch / oldscale) + (halfch / scale);
-
-	redrawIfNotPlaying();
+	setCanvasCenterWithZoom(x, y, CameraZoom * oldscale / scale)
 }
 
 
@@ -866,8 +861,8 @@ function redrawIfNotPlaying()
 
 
 function getCanvasCenter() {
-	const x = XtoWorld(Canvas.width / 2);
-	const y = YtoWorld(Canvas.height / 2);
+	const x = XtoWorld((Canvas.width / 2) / options_canvasScale);
+	const y = YtoWorld((Canvas.height / 2) / options_canvasScale);
 	return [x, y];
 }
 
@@ -883,5 +878,5 @@ function setCanvasCenterWithZoom(x, y, zoom) {
 	CameraX = (-XtoCanvas(x) + (Canvas.width / 2) / options_canvasScale)
 	CameraY = (-YtoCanvas(y) + (Canvas.height / 2) / options_canvasScale)
 
-	drawCanvas();
+	redrawIfNotPlaying();
 }
