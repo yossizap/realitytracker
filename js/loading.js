@@ -529,7 +529,7 @@ function stage4LoadingFininshed()
 	Reset()
 	
 	//Load options from localStorage
-	loadOptions()
+	loadSettings()
 	
 	//Draw the canvas for the first time
 	drawCanvas()
@@ -552,8 +552,10 @@ function stage4LoadingFininshed()
 		const cy = parseFloat(getUrlParameter("cy"));
 		const czoom = parseFloat(getUrlParameter("czoom"));
 		if (!isNaN(cx) && !isNaN(cy))
-			setCanvasCenterWithZoom(cx, cy, isNaN(czoom) ? 1 : czoom);
-	}
+			setCanvasCenterWithZoom(cx, cy, isNaN(czoom) ? 1 : czoom / options_canvasScale);
+	} else {
+		setCanvasCenterWithZoom(0, 0, 1);
+    }
 
 }
 
@@ -695,20 +697,21 @@ function createMapImageWithCombatArea()
 }
 
 //Load settings from local storage
-function loadOptions()
+function loadSettings()
 {
 	for (var Name in localStorage) 
 		if (Name.startsWith("options_"))
 		{
-			
 			changeSetting(Name, JSON.parse(localStorage[Name]))
-			if($("input[value='"+Name+"']")[0])
-				$("input[value='" + Name + "']")[0].checked = window[Name]
 
-			// TODO set by input type - terrible hack here
-			if ($("input[id='" + Name + "']")[0])
-				$("input[id='" + Name + "']")[0].value = window[Name]
 
+			if ($("input[id='" + Name + "']")[0]) {
+				const input = $("input[id='" + Name + "']")[0]
+				if (input.type == "checkbox")
+					input.checked = window[Name]
+				else if (input.type == "range")
+					input.value = window[Name]
+            }
 		}
 }
 

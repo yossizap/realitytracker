@@ -280,7 +280,7 @@ function getTimeString(time)
 
 function checkboxClicked(Checkbox)
 {
-	changeSetting(Checkbox.value, Checkbox.checked)
+	changeSetting(Checkbox.id, Checkbox.checked)
 }
 
 // Called when an options checkbox is clicked.
