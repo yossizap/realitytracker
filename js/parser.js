@@ -558,7 +558,10 @@ function VehicleUpdate(FullMessage)
 
 		//Debugging, This should never happen
 		if (CurrentVehicle == null)
+		{
 			console.log("Unknown vehicle " + id)
+			return;
+		}
 
 		if (flags & VEHICLEUPDATEFLAGS.TEAM)
 		{
