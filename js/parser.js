@@ -661,7 +661,8 @@ function FlagUpdate(FullMessage)
 {
 	const unpacked = FullMessage.unPack(1, "HB")
 	const parsed = unpacked[1]
-	AllFlags[parsed[0]].team = parsed[1]
+	if (parsed[0] in AllFlags)
+		AllFlags[parsed[0]].team = parsed[1]
 }
 
 // Tickets 
