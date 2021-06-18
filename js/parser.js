@@ -208,7 +208,7 @@ class PlayerObject extends InterpolatedGameObject
 			if (KitSubName in KitNameToImageDictionary && KitNameToImageDictionary[KitSubName] in icons)
 				this.ns_kitImage = icons[KitNameToImageDictionary[KitSubName]]
 			else
-				console.log("Parser: unknown kit name " + Player.kit)
+				console.log("Parser: unknown kit name " + this.kit)
 		}
     }
 
