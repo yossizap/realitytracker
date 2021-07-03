@@ -20,7 +20,7 @@ function onReset()
 
 	gametimelasttime = NaN;
 	// redraw the map 
-	drawCanvas()
+	requestUpdate();
 }
 
 

@@ -11,7 +11,6 @@ var Tick_Current = 0
 
 // Important functions and variables to call from drawing logic / GUI: 
 // goTo(Tick) Go to a specific tick. Calls some UI updates
-// drawCanvas() Redraw the canvas 
 // Call Reset() to completely reset everything 
 // Call loadDemo(URL) to load a PRDemo file from URL. Will call Reset() and update the map image according to the demo's header 
 // Call Update() to advance by 1 recording tick. also update the variables below:	 // calls some UI updates depending on changes in the tick	
@@ -108,6 +107,7 @@ class GameObject
 		this.X = X
 		this.Y = Y
 		this.Z = Z
+		this.team = 0;
 	}
 	getX() {
 		return this.X;
@@ -127,6 +127,16 @@ class GameObject
 	}
 	getCanvasY() {
 		return YtoCanvas(this.getZ())
+	}
+	getTeamColor2d() {
+
+	}
+	getTeamColor3d() {
+		switch (this.team) {
+			case 0: return renderer3d.white;
+			case 1: return renderer3d.red;
+			case 2: return renderer3d.blue;
+        }
 	}
 	onLoadState() {}
 }
@@ -1045,8 +1055,7 @@ function goTo(Tick_Target)
 	if (Tick_Current < Tick_Target) // If no updates are needed, the UI should be already updated from loading the state
 		Update() // Do the last update with isFastForwarding false to cause UI update 
 
-	if (!isPlaying)
-		drawCanvas()
+	requestUpdate();
 }
 
 

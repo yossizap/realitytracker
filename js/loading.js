@@ -51,7 +51,7 @@ $(()=>
 			
 
 	// draw canvas on resize 
-	window.onresize = function() {drawCanvas()}
+	window.onresize = function() {requestUpdate()}
 	
 	$("#demoFileSelection")[0].addEventListener('change', loadDemoFromFile);
 	
@@ -534,10 +534,10 @@ function stage4LoadingFininshed()
 	loadSettings()
 	
 	//Draw the canvas for the first time
-	drawCanvas()
+	requestUpdate();
 
 	// Chrome hack: draw again a second later, its doing some async caching and images are not ready
-	setTimeout(drawCanvas, 300);
+	setTimeout(requestUpdate, 300);
 	
 	//Reset speed to 1
 	setSpeed(1)

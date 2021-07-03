@@ -82,6 +82,7 @@ function requestUpdate() {
 
 
 function update() {
+	updateRequested = false;
 	const now = performance.now();
 	if (lastUpdateTime == null)
 		lastUpdateTime = now - 10;
@@ -91,18 +92,16 @@ function update() {
 
 	updateLogic(frameTime);	
 	animations.update(frameTime);
+	activeRenderer.update(frameTime);
 
-	if (is3DMode) {
-		renderer3d.update(frameTime);
-    }
 
-	drawCanvas();
+	activeRenderer.draw();
 
-	updateRequested = false;
 
 	if (animations.animationsPlaying() || isPlaying)
 		requestUpdate();
-	else
+
+	if (!updateRequested)
 		lastUpdateTime = null;
 
 }
@@ -177,7 +176,7 @@ function onKeyDown(e)
 		return
 
 	keysDown.add(e.which);
-
+	requestUpdate();
 	// 1 - 9
 	if (e.which >= 49 && e.which <= 57)
 	{
@@ -243,6 +242,8 @@ function onKeyDown(e)
 	// prevent the default action (unless its i which opens console and its annoying to override it)
 	if (e.which != 73)
 		e.preventDefault(); 
+
+
 }
 
 function onKeyUp(e)
@@ -340,19 +341,25 @@ function hidePlayBarBubble()
 }
 
 var is3DMode = false;
+var activeRenderer;
 function toggle3dMode() {
 	if (is3DMode) {
 		is3DMode = false;
+		activeRenderer = renderer2d;
 		$("#map")[0].style.display = "block";
 		$("#map3d")[0].style.display = "none";
 	} else {
 		is3DMode = true;
+		activeRenderer = renderer3d;
 		$("#map")[0].style.display = "none";
 		$("#map3d")[0].style.display = "block";
 		renderer3d.init();
+		renderer3d.draw();
     }
 
 }
+
+$(() => activeRenderer = renderer2d);
 
 //TODO menu styles
 $( function() {$( "#menuList" ).menu(

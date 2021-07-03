@@ -84,6 +84,10 @@ class Heightmap {
         return this.waterlevel;
     };
 
+    // TODO
+    getHeightFromCoords(x,z) {
+        return 100.0;
+    }
 
 
 }

@@ -55,7 +55,7 @@ function killfeed_Select(killid)
 		SelectedKill = killid
 
 	if (!isPlaying())
-		drawCanvas()
+		requestUpdate();
 }
 
 var killfeed_DOMCollection = [] // Array of all killrows elements

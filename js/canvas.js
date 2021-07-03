@@ -137,17 +137,13 @@ function UIScaleChange() {
 var gametimepassed = 0;
 var gametimelasttime = NaN;
 
-function drawCanvas() {
-	if (is3DMode)
-		renderer3d.draw();
-	else
-		renderer2d.draw();
-}
-
 var renderer2d;
 class Renderer2d {
 
 	cameraPos = vec2.create();
+	update(frameTime) {
+
+    }
 
 	draw() {
 		if (!MapImageReady)
@@ -869,6 +865,8 @@ function getCanvasCenter() {
 function setCanvasCenterWithZoom(x, y, zoom) {
 	CameraZoom = zoom;
 	MapImageDrawSize = 1024 * CameraZoom
+	Canvas.width = mapDiv.clientWidth
+	Canvas.height = mapDiv.clientHeight
 
 	CameraX = 0;
 	CameraY = 0;

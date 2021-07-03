@@ -7,6 +7,7 @@ class Geometry2dRenderer {
     gpu_attribute_vertices = null;
     gpu_uniform_viewMatrix = null;
     gpu_uniform_projectionMatrix = null;
+    gpu_uniform_rot = null;
 
     gpu_buffer_vertices = null;
     gpu_buffer_textureCoords = null;
@@ -31,15 +32,24 @@ class Geometry2dRenderer {
             attribute vec2 aTextureUV;
 
             uniform vec3 uPos;
+            uniform float uRot;
             uniform mat4 uViewMatrix;
             uniform mat4 uProjectionMatrix;
 
             varying highp vec2 vTextureCoord;
 
             void main() {      
-              mat4 modelView = mat4(1.0);
-              modelView[3] = uViewMatrix * vec4(uPos, 1.0);
-              gl_Position = uProjectionMatrix * modelView * vec4(aVertexPosition, 0.0, 1.0);
+              float c = cos(uRot);
+              float s = sin(uRot);
+              mat4 viewModel = mat4(
+                        vec4(c,-s,0.0,0.0),          
+                        vec4(s,c,0.0,0.0),          
+                        vec4(0.0,0.0,1.0,0.0),           
+                        vec4(uPos, 1.0)); 
+            
+              viewModel[3] = uViewMatrix * viewModel[3];
+
+              gl_Position = uProjectionMatrix * viewModel * vec4(aVertexPosition, 0.0, 1.0);
 
               vTextureCoord = aTextureUV;
             }
@@ -84,6 +94,7 @@ class Geometry2dRenderer {
         this.gpu_uniform_viewMatrix = gl.getUniformLocation(prog, 'uViewMatrix');
         this.gpu_uniform_pos = gl.getUniformLocation(prog, 'uPos');
         this.gpu_uSampler = gl.getUniformLocation(prog, 'uSampler');
+        this.gpu_uniform_rot = gl.getUniformLocation(prog, 'uRot');
         
 
         let positions = [
@@ -98,12 +109,12 @@ class Geometry2dRenderer {
             new Float32Array(positions),
             gl.STATIC_DRAW);
 
-
+        // Y inversed from above, all icons are pointing down, but we want up to be north
         positions = [
-            0.0, 1.0,
-            1.0, 1.0,
             0.0, 0.0,
             1.0, 0.0,
+            0.0, 1.0,
+            1.0, 1.0,
         ];
         this.gpu_buffer_textureCoords = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, this.gpu_buffer_textureCoords);
@@ -139,8 +150,8 @@ class Geometry2dRenderer {
             color = this.blue;
 
         const pos3 = v.getPos();
-        pos3[1] += 10.0;
-        geometry.draw(pos3, 0, color);
+        pos3[1] += 8.0;
+        geometry.draw(pos3, ((v.getRotation() + renderer3d.cameraYaw) / 180.0 * Math.PI), color);
     }
 
     drawProj(p) {
@@ -165,13 +176,10 @@ class Geometry2dRenderer {
 
         const imageName = proj.ns_iconName;
         const geometry = this.getCreate2DGeometry(imageName);
-        if (geometry === null)
-            return;
-
 
         const pos3 = proj.getPos();
-        pos3[1] += 10.0;
-        geometry.draw(pos3, 0, color);
+        pos3[1] += 8.0;
+        geometry.draw(pos3, ((proj.getRotation() + renderer3d.cameraYaw) / 180.0 * Math.PI), color);
     }
 
     draw() {
@@ -243,6 +251,9 @@ class Geometry2d {
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
         gl.uniform1i(geometry2dRenderer.gpu_uSampler, 0);
+
+
+        gl.uniform1f(geometry2dRenderer.gpu_uniform_rot, rot);       
 
         // set position
         gl.uniform3fv(geometry2dRenderer.gpu_uniform_pos, pos3);

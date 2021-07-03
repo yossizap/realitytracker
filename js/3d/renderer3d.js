@@ -18,7 +18,7 @@ class Renderer3d {
     cameraPitch = 0;
 
     
-    fov = 80;
+    fov = 95;
     
     constructor() {
 
@@ -113,6 +113,15 @@ class Renderer3d {
         vec3.transformQuat(forward, forward, quat);
         return forward;
     }
+    getCameraForwardUp(quat) {
+        if (quat == null)
+            quat = this.getCameraQuat();
+        const forward = vec3.create();
+        vec3.set(forward, 0, 0.3, -1, 0);
+        vec3.normalize(forward, forward);
+        vec3.transformQuat(forward, forward, quat);
+        return forward;
+    }
 
     getCameraRight(quat) {
         if (quat == null)
@@ -134,19 +143,28 @@ class Renderer3d {
 
     // Called when mouse is moved when held down
     mouseMove(x, y) {
-        this.cameraYaw -= x / 5;
-        this.cameraPitch += y / 5;
+        this.cameraYaw += x / 6;
+        this.cameraPitch += y / 6;
 
+        this.clampRotation();
+
+        requestUpdate();
+    };
+
+    clampRotation() {
         if (this.cameraYaw < 0)
             this.cameraYaw += 360;
         else
             this.cameraYaw = this.cameraYaw % 360;
 
         this.cameraPitch = clamp(-80, this.cameraPitch, 80);
+    }
+    clampPosition() {
+        const height = heightmap.getHeightFromCoords(this.cameraPos[0], -this.cameraPos[2]);
 
-        requestUpdate();
-    };
-
+        if (this.cameraPos[1] < height)
+            this.cameraPos[1] = height;
+    }
 
     drawables = [];
     addDrawable(drawable) {
@@ -156,29 +174,31 @@ class Renderer3d {
     update(frameTime) {
         let keyPressed = false;
         if (keysDown.has(87)) { // W
-            const forward = vec3.scale(vec3.create(), this.getCameraForward(), frameTime * 140.0);
+            const forward = vec3.scale(vec3.create(), this.getCameraForwardUp(), frameTime * 350.0);
             vec3.add(this.cameraPos, this.cameraPos, forward);
             keyPressed = true;
         }
         if (keysDown.has(83)) { // S
-            const forward = vec3.scale(vec3.create(), this.getCameraForward(), -frameTime * 140.0);
+            const forward = vec3.scale(vec3.create(), this.getCameraForwardUp(), -frameTime * 350.0);
             vec3.add(this.cameraPos, this.cameraPos, forward);
             keyPressed = true;
         }
         if (keysDown.has(68)) { // D
-            const right = vec3.scale(vec3.create(), this.getCameraRight(), frameTime * 140.0);
+            const right = vec3.scale(vec3.create(), this.getCameraRight(), frameTime * 350.0);
             vec3.add(this.cameraPos, this.cameraPos, right);
             keyPressed = true;
         }
         if (keysDown.has(65)) { // A
-            const right = vec3.scale(vec3.create(), this.getCameraForward(), -frameTime * 140.0);
+            const right = vec3.scale(vec3.create(), this.getCameraRight(), -frameTime * 350.0);
             vec3.add(this.cameraPos, this.cameraPos, right);
             keyPressed = true;
         }
 
+        this.clampPosition();
 
         if (keyPressed)
             requestUpdate();
+
     }
 
     draw() {
