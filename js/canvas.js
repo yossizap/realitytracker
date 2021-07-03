@@ -42,16 +42,9 @@ var playSpeed = 1
 function setSpeed(multiplier)
 {
 	playSpeed = multiplier
-
-	var currentInterpAmount = interpolation_CurrentFrame / interpolation_FramesPerTick //The current amount of % ([0,1]) between last tick and current tick
-	interpolation_FramesPerTick = ((1000 / frameTime) / multiplier) * DemoTimePerTick //How many frames per game tick would I need at X fps for this speed?
-	interpolation_CurrentFrame = Math.round(currentInterpAmount * interpolation_FramesPerTick) //Set the current interpolation amount to be roughly around the same % as it was before the speed change 
-
 	updateHeader()
 }
 
-var interpolation_FramesPerTick = 15 //how many frames per game tick
-var interpolation_CurrentFrame = 0 //current frame (out of frames per tick)
 var interpolation_CurrentAmount = 0
 
 
@@ -144,86 +137,99 @@ function UIScaleChange() {
 var gametimepassed = 0;
 var gametimelasttime = NaN;
 
-function drawCanvas()
-{
-	if (!MapImageReady)
-		return
-
-
-	var gametime = (Tick_Current + interpolation_CurrentAmount) * DemoTimePerTick;
-	gametimepassed = Math.max(0, (gametime - (isNaN(gametimelasttime) ? gametime : gametimelasttime)));
-	gametimelasttime = gametime;
-
-	//Reset canvas width and height (Efficient, only does actual changes if value differs)
-	Canvas.width = mapDiv.clientWidth
-	Canvas.height = mapDiv.clientHeight
-	Context.scale(options_canvasScale, options_canvasScale);
-
-	//Clear canvas, reapply new background
-	Context.clearRect(0, 0, Canvas.width, Canvas.height);
-	if (options_DrawDOD)
-		Context.drawImage(MapImageWithCombatArea, CameraX, CameraY, MapImageDrawSize, MapImageDrawSize)
+function drawCanvas() {
+	if (is3DMode)
+		renderer3d.draw();
 	else
-		Context.drawImage(MapImage, CameraX, CameraY, MapImageDrawSize, MapImageDrawSize)
-	
-	
-	
-	//Draw Flags
-	Context.lineWidth = 1
-	for (var i in AllFlags)
-		drawFlag(i)
-
-
-	//Draw Rallies
-	Context.font = "bold 26px Arial";
-	Context.strokeStyle = "green"
-	Context.lineWidth = 2;
-	for (var i in AllRallies)
-		drawRally(i)
-
-	//Draw killlines
-	if (options_DrawKillLines)
-		for (var i = 0, len = killLines.length; i < len; i++)
-			killLine_Draw(killLines[i]);
-
-	//Draw fobs
-	Context.lineWidth = 1;
-	Context.strokeStyle = "black"
-	for (var i in AllFobs)
-		drawFob(i)
-	
-	SquadVehicles = {}
-	Context.font = "bold 12px Arial";
-	for (var i in AllPlayers)
-		if (i != SelectedPlayer)
-			drawPlayer(i)
-
-	
-	for (var i in AllVehicles)
-		drawVehicle(i)
-	
-	for (var i in AllCaches)
-		drawCache(i)
-	for (var i in AllProj)
-		drawProj(i)
-	
-	//Draw selected player above everyone else
-	if (SelectedPlayer != SELECTED_NOTHING)
-		drawPlayer(SelectedPlayer)
-
-
-	//Draw selected kill line
-	if (SelectedKill != SELECTED_NOTHING)
-		killLine_DrawSelected()
-		
-	
-	if (options_drawAllOrderIcons)
-		for (var index in AllSLOrders)
-			drawOrderIcon(AllSLOrders[index])
-
-
-	Animations.draw(Context);
+		renderer2d.draw();
 }
+
+var renderer2d;
+class Renderer2d {
+
+	cameraPos = vec2.create();
+
+	draw() {
+		if (!MapImageReady)
+			return
+
+		var gametime = (Tick_Current + interpolation_CurrentAmount) * DemoTimePerTick;
+		gametimepassed = Math.max(0, (gametime - (isNaN(gametimelasttime) ? gametime : gametimelasttime)));
+		gametimelasttime = gametime;
+
+		//Reset canvas width and height (Efficient, only does actual changes if value differs)
+		Canvas.width = mapDiv.clientWidth
+		Canvas.height = mapDiv.clientHeight
+		Context.scale(options_canvasScale, options_canvasScale);
+
+		//Clear canvas, reapply new background
+		Context.clearRect(0, 0, Canvas.width, Canvas.height);
+		if (options_DrawDOD)
+			Context.drawImage(MapImageWithCombatArea, CameraX, CameraY, MapImageDrawSize, MapImageDrawSize)
+		else
+			Context.drawImage(MapImage, CameraX, CameraY, MapImageDrawSize, MapImageDrawSize)
+
+
+
+		//Draw Flags
+		Context.lineWidth = 1
+		for (var i in AllFlags)
+			drawFlag(i)
+
+
+		//Draw Rallies
+		Context.font = "bold 26px Arial";
+		Context.strokeStyle = "green"
+		Context.lineWidth = 2;
+		for (var i in AllRallies)
+			drawRally(i)
+
+		//Draw killlines
+		if (options_DrawKillLines)
+			for (var i = 0, len = killLines.length; i < len; i++)
+				killLine_Draw(killLines[i]);
+
+		//Draw fobs
+		Context.lineWidth = 1;
+		Context.strokeStyle = "black"
+		for (var i in AllFobs)
+			drawFob(i)
+
+		SquadVehicles = {}
+		Context.font = "bold 12px Arial";
+		for (var i in AllPlayers)
+			if (i != SelectedPlayer)
+				drawPlayer(i)
+
+
+		for (var i in AllVehicles)
+			drawVehicle(i)
+
+		for (var i in AllCaches)
+			drawCache(i)
+		for (var i in AllProj)
+			drawProj(i)
+
+		//Draw selected player above everyone else
+		if (SelectedPlayer != SELECTED_NOTHING)
+			drawPlayer(SelectedPlayer)
+
+
+		//Draw selected kill line
+		if (SelectedKill != SELECTED_NOTHING)
+			killLine_DrawSelected()
+
+
+		if (options_drawAllOrderIcons)
+			for (var index in AllSLOrders)
+				drawOrderIcon(AllSLOrders[index])
+
+
+		animations.draw(Context);
+    }
+}
+$(() => { renderer2d = new Renderer2d(); });
+
 
 // enum -> [icon, color]
 const orderEnums = [null,
@@ -853,13 +859,6 @@ function getStyle(Team, Squad)
 }
 
 
-function redrawIfNotPlaying()
-{
-	if (!isPlaying() && !Animations.animationsPlaying())
-		drawCanvas()
-}
-
-
 function getCanvasCenter() {
 	const x = XtoWorld((Canvas.width / 2) / options_canvasScale);
 	const y = YtoWorld((Canvas.height / 2) / options_canvasScale);
@@ -878,5 +877,5 @@ function setCanvasCenterWithZoom(x, y, zoom) {
 	CameraX = (-XtoCanvas(x) + (Canvas.width / 2) / options_canvasScale)
 	CameraY = (-YtoCanvas(y) + (Canvas.height / 2) / options_canvasScale)
 
-	redrawIfNotPlaying();
+	requestUpdate();
 }

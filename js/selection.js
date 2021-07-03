@@ -99,7 +99,7 @@ function selection_SelectPlayer(i, allowHighlight)
 
 	selection_UpdateInformationBox()
 
-	redrawIfNotPlaying()
+	requestUpdate();
 }
 
 
@@ -175,7 +175,7 @@ function selection_SelectSquad(Team, Squad)
 		SelectedSquadNumber = Squad
 	}
 	// Redraw map to color the squad
-	redrawIfNotPlaying()
+	requestUpdate();
 }
 
 function selection_DeselectCurrent()

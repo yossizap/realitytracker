@@ -43,83 +43,102 @@ var options_health_vehicles = true
 var options_drawAllOrderIcons = false
 	//}
 
-//{TIMER - Functions for handling the timer
-var Timer = null
+
 // Called when Start/pause button is clicked 
 function togglePlay()
 {
-	if (!isPlaying())
+	if (!isPlaying)
 		Start()
 	else
 		Stop()
 }
 
+var lastUpdateTime = null;
+var isPlaying = false;
 function Start()
 {
-	//using setTimeout instead of interval so its possible to easily change play speed on the fly.
-	Timer = setTimeout(playTimerFire, frameTime)
+	isPlaying = true;
+	lastUpdateTime = performance.now();
+	requestUpdate();
 	onResume()
 }
 
 function Stop()
 {
-	clearTimeout(Timer)
-	Timer = null
+	isPlaying = false;
 	onPause()
-	playTimerPausedWaitingForData = false
 }
 
-var frameTime = 16.66
 
-// True when update returns false and we're playing
-var playTimerPausedWaitingForData = false
+var updateRequested = false;
+function requestUpdate() {
+	if (updateRequested) {
+		return;
+    }
+		
+	updateRequested = true;
+	requestAnimationFrame(update);
+}
+
+
+function update() {
+	const now = performance.now();
+	if (lastUpdateTime == null)
+		lastUpdateTime = now - 10;
+
+	const frameTime = (now - lastUpdateTime) / 1000.0;
+	lastUpdateTime = now;
+
+	updateLogic(frameTime);	
+	animations.update(frameTime);
+
+	if (is3DMode) {
+		renderer3d.update(frameTime);
+    }
+
+	drawCanvas();
+
+	updateRequested = false;
+
+	if (animations.animationsPlaying() || isPlaying)
+		requestUpdate();
+	else
+		lastUpdateTime = null;
+
+}
 
 // Called every timer fire, 60fps currently
-function playTimerFire()
+function updateLogic(frameTime)
 {
-	interpolation_CurrentAmount = (interpolation_CurrentFrame % interpolation_FramesPerTick) /
-		interpolation_FramesPerTick
+	if (!isPlaying)
+		return;
+
+	const ticksPassed = (frameTime / DemoTimePerTick) * playSpeed;
+	interpolation_CurrentAmount += ticksPassed;
 
 	// while: for very fast speeds, skip drawing between updates.
-	while (interpolation_CurrentFrame >= interpolation_FramesPerTick)
+	while (interpolation_CurrentAmount >= 1.0)
 	{
 		if (!Update()) // If update returned false, don't touch anything anymore.
-		{
-			playTimerPausedWaitingForData = true
 			return
-		}
-
-		interpolation_CurrentFrame -= interpolation_FramesPerTick
+		
+		interpolation_CurrentAmount--;
 	}
-
-	Timer = setTimeout(playTimerFire, frameTime)
-	playTimerPausedWaitingForData = false
-	drawCanvas()
-
-	interpolation_CurrentFrame++
 }
 
-function isPlaying()
-{
-	return (Timer != null)
-}
 
-// Called when the playbar object receives user input
-// Limit to 60fps to prevent 1000hz gaming mice from choking it.
-var RangeChangeCooldownTimer = null
-var RangeChangeCooldownTime = 33
-
+const playBarChangeCooldown = 33.33;
+var lastPlayBarChange = 0;
 function onPlayBarChange()
 {
-	if (RangeChangeCooldownTimer != null)
-		return
+	const now = performance.now();
+	if (now - lastPlayBarChange < playBarChangeCooldown)
+		return;
+	lastPlayBarChange = now;
 
-	RangeChangeCooldownTimer = setTimeout(function ()
-	{
-		RangeChangeCooldownTimer = null
-	}, RangeChangeCooldownTime)
-
+	lastPlayBarChange = now;
 	goTo($("#playBar")[0].value)
+	requestUpdate(); 
 }
 
 function onPlaySpeedChange()
@@ -150,11 +169,14 @@ const TICKS_JUMP_AMOUNT = 10
 
 var HealthButtonDown = false
 
+var keysDown = new Set();
 function onKeyDown(e)
 {
 	// Return if a modal is open
 	if ($("#addbookmarkComment").dialog("isOpen"))
 		return
+
+	keysDown.add(e.which);
 
 	// 1 - 9
 	if (e.which >= 49 && e.which <= 57)
@@ -169,11 +191,10 @@ function onKeyDown(e)
 		{
 		case 32: //space
 			togglePlay()
-			break
-		
+			break		
 		case 72: //h
 			HealthButtonDown = true
-			redrawIfNotPlaying()
+			requestUpdate()
 			break
 		case 73: //i
 			toggleSubMenu("serverinfo")
@@ -181,7 +202,7 @@ function onKeyDown(e)
 		case 90: //z
 			toggleSubMenu("scoreBoard")
 			break
-		case 88:  //x
+		case 88: //x
 			toggleSubMenu("kills")
 			break
 		case 67: //c
@@ -196,8 +217,11 @@ function onKeyDown(e)
 		case 75: //k
 			toggleSubMenu("kitAllocations")
 			break
-		case 68: //d
-			toggleSubMenu("vehicleDestroyers")
+		//case 68: //d
+		//	toggleSubMenu("vehicleDestroyers")
+		//	break;
+		case 71: //g
+			toggle3dMode()
 			break
 		case 37: // left
 			if (e.shiftKey)
@@ -210,7 +234,7 @@ function onKeyDown(e)
 			if (e.shiftKey)
 				goTo(Tick_Current + TICKS_JUMP_AMOUNT_SHIFT)
 			else
-				goTo(Tick_Current + TICKS_JUMP_AMOUNT)
+				goTo(Tick_Current + TICKS_JUMP_AMOUNT);
 			break
 		default:
 			return;
@@ -223,14 +247,14 @@ function onKeyDown(e)
 
 function onKeyUp(e)
 {
+	keysDown.delete(e.which);
 	switch (e.which)
 	{
 		case 72: //h
 			HealthButtonDown = false
-			redrawIfNotPlaying()
+			requestUpdate();
 			break
-	}
-	
+	}	
 	e.preventDefault();
 }
 
@@ -289,7 +313,7 @@ function changeSetting(settingName, val)
 	window[settingName] = val
 	localStorage[settingName] = JSON.stringify(window[settingName])
 
-	redrawIfNotPlaying()
+	requestUpdate();
 }
 
 
@@ -315,6 +339,20 @@ function hidePlayBarBubble()
 	playBarBubble.style.display = "none"
 }
 
+var is3DMode = false;
+function toggle3dMode() {
+	if (is3DMode) {
+		is3DMode = false;
+		$("#map")[0].style.display = "block";
+		$("#map3d")[0].style.display = "none";
+	} else {
+		is3DMode = true;
+		$("#map")[0].style.display = "none";
+		$("#map3d")[0].style.display = "block";
+		renderer3d.init();
+    }
+
+}
 
 //TODO menu styles
 $( function() {$( "#menuList" ).menu(

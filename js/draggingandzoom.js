@@ -3,12 +3,12 @@
 // Drag and Zoom System
 $(function ()
 {
-	// var Canvas = $("#map")[0]
+	const mapdiv = $("#renderers")[0]
 	// var Context = Canvas.getContext("2d")
 	// <!--  MouseDown, wheel, click are only relevant on the canvas -->
-	Canvas.addEventListener("mousedown", MouseDown, false)
-	Canvas.addEventListener("click", MouseClick, false)
-	Canvas.addEventListener("wheel", Wheel, false)
+	mapdiv.addEventListener("mousedown", MouseDown, false)
+	mapdiv.addEventListener("click", MouseClick, false)
+	mapdiv.addEventListener("wheel", Wheel, false)
 	// <!-- Mouse Up/move is always important to catch everywhere so we can keep dragging when the mouse leaves the canvas -->
 	document.addEventListener("mouseup", function (event)
 	{
@@ -21,6 +21,10 @@ $(function ()
 // Position the mouse went down on
 var MouseDownPosX
 var MouseDownPosY
+
+var MouseLastPosX
+var MouseLastPosY
+
 // Position of the Camera when the mouse went down
 var MouseDownCameraX
 var MouseDownCameraY
@@ -51,6 +55,8 @@ function MouseDown(event)
 	var pos = GetMousePos(event)
 	MouseDownPosX = pos.X
 	MouseDownPosY = pos.Y
+	MouseLastPosX = pos.X;
+	MouseLastPosY = pos.Y;
 	MouseDownCameraX = CameraX
 	MouseDownCameraY = CameraY
 	MouseIsDown = true
@@ -63,11 +69,19 @@ function MouseMove(event)
 	{
 		event.preventDefault();
 		var pos = GetMousePos(event)
-		CameraX = MouseDownCameraX - (MouseDownPosX - pos.X)
-		CameraY = MouseDownCameraY - (MouseDownPosY - pos.Y)
 
-		clampCamera()
-		redrawIfNotPlaying()
+		if (is3DMode) {
+			renderer3d.mouseMove(pos.X - MouseLastPosX, pos.Y - MouseLastPosY);
+		} else {
+			CameraX = MouseDownCameraX + (pos.X - MouseDownPosX);
+			CameraY = MouseDownCameraY + (pos.Y - MouseDownPosY);
+        }
+
+		MouseLastPosX = pos.X;
+		MouseLastPosY = pos.Y;
+
+		clampCamera();
+		requestUpdate();
 	}
 }
 
@@ -142,8 +156,8 @@ function MouseClick(event)
 		doubleclick_Clear()
 		handleDoubleClick(objectToSelect)
 	}
-	
-	redrawIfNotPlaying()
+
+	requestUpdate();
 }
 
 function handleSingleClick(objectClicked) {
@@ -220,6 +234,7 @@ class ZoomAnimation extends AnimationInstance {
 		return this.ZoomTime >= ZoomTotalTime || (MouseIsDown);
 	}
 	delete() {
+		
 		this.ZoomTicks = 99999999;
 		ZoomAnimation.instance = null;
     }

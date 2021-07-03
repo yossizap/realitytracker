@@ -102,7 +102,6 @@ function loadIconsAndDictionaries()
 		atlasJSON_loaded = true
 		atlasLoaded()
 		
-		
 		//KIT DICTIONARY
 		KitNameToImageDictionary = json.kits
 		objectLoaded();
@@ -456,6 +455,9 @@ function stage3LoadingFininshed()
 			setTimeout(stage4LoadingFininshed,5)
 	}
 	MapImage.load(MapsURL + MapName + ".png")
+
+	// Load this map's heightmap raw and configuration
+	heightmap.init("heightmap.raw", null); // TODO
 	
 	// TODO handle unknown flag names.
 	bluforflag = icons[BluForTeam.toLowerCase() + "_cp"]
@@ -535,7 +537,7 @@ function stage4LoadingFininshed()
 	drawCanvas()
 
 	// Chrome hack: draw again a second later, its doing some async caching and images are not ready
-	setTimeout(drawCanvas, 1000);
+	setTimeout(drawCanvas, 300);
 	
 	//Reset speed to 1
 	setSpeed(1)

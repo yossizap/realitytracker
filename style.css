@@ -370,7 +370,7 @@ for i in range(1,3):
 	/*----------Map ----------*/
 	
 	
-	#mapDiv 
+	#mapDiv, #renderers
 	{
 		position: absolute;
 		overflow: hidden;

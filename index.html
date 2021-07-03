@@ -26,6 +26,11 @@
 	<script src="js/highlightarea.js"></script>
 	<!-- <script src="js/immutable.min.js"></script> -->
 	<script src="js/zlib_inflate.js"></script>
+	<script src="js/3d/renderer3d.js"></script>
+	<script src="js/3d/gl-matrix.js"></script>
+	<script src="js/3d/heightmap.js"></script>
+	<script src="js/3d/terrain.js"></script>
+	<script src="js/3d/geometry2d.js"></script>
 	<script>if (window.module) module = window.module;</script>
 	<!-- <script src="js/init_prt.js"></script> -->
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet">
@@ -350,7 +355,10 @@
 					<img src=".\Graphics\UI\stacks.png">
 				</div>
 				<div id="mapDiv">
-					<canvas id="map"></canvas>
+					<div id="renderers">
+						<canvas id="map"></canvas>
+						<canvas id="map3d" style="display: none;"></canvas>
+					</div>
 					<div id="controlBarContainer">
 						<button id="startPauseButton" class="state-paused" type="button" onclick="togglePlay()">
 							<div class="play-icon">

@@ -359,6 +359,6 @@ function kf_makeRow(kill, row)
 function kf_select(killid)
 {
 	SelectedKill = killid
-	
-	redrawIfNotPlaying()
+
+	requestUpdate();
 }

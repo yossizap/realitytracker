@@ -115,6 +115,10 @@ class GameObject
 	getZ() {
 		return this.Z;
 	}
+	// Negate Z to convert from game's left hand system to glmatrix lib right hand stuff
+	getPos() {
+		return vec3.set(vec3create(), this.X, this.Y, -this.Z);
+	}
 	getRotation() {
 		return 0
 	}
@@ -132,11 +136,19 @@ class InterpolatedGameObject extends GameObject
 	constructor(X,Y,Z) {
 		super(X,Y,Z)
 		this.ns_lastX = X
+		this.ns_lastY = Y
 		this.ns_lastZ = Z
 		this.ns_lastRotation = 0
 		this.rotation = 0	
 	}
-	
+
+	getPos() {
+		return vec3.set(vec3.create(),
+			interpolate(this.ns_lastX, this.X),
+			interpolate(this.ns_lastY, this.Y),
+			-interpolate(this.ns_lastZ, this.Z));
+	}
+
 	getX() {
 		return interpolate(this.ns_lastX, this.X);
 	}
@@ -148,6 +160,7 @@ class InterpolatedGameObject extends GameObject
 	}
 	updateInterpHistory(){
 		this.ns_lastX = this.X
+		this.ns_lastY = this.Y
 		this.ns_lastZ = this.Z
 		this.ns_lastRotation = this.rotation;
 	}
@@ -468,6 +481,7 @@ class VehicleObject extends InterpolatedGameObject
 
 		this.menuImage = null
 		this.mapImage = coloredIcons["mini_shp_light"]
+		this.mapImageName = "mini_shp_light";
 
 		this.maxHealth = 0
 		this.health = 0
@@ -530,6 +544,7 @@ function VehicleAdd(FullMessage)
 		if (CurrentVehicle.name in vehicleData)
 		{
 			const data = vehicleData[CurrentVehicle.name]
+			CurrentVehicle.mapImageName = data.MiniMapIcon;
 			CurrentVehicle.mapImage = coloredIcons[data.MiniMapIcon] //Map Image is a must
 			if (data.MenuIcon != "")
 				CurrentVehicle.menuImage = icons[data.MenuIcon] //Menuimage is optional
@@ -873,6 +888,7 @@ class ProjObject extends InterpolatedGameObject
 	}
 
 	initializeNoState() {
+		this.ns_iconName = ProjectileTypeToImageName[this.type];
 		this.ns_icon = coloredIcons[ProjectileTypeToImageName[this.type]]
 		this.ns_shouldRotate = ProjectileTypeShouldRotate[this.type]
 		this.ns_isFast = false
@@ -1029,7 +1045,7 @@ function goTo(Tick_Target)
 	if (Tick_Current < Tick_Target) // If no updates are needed, the UI should be already updated from loading the state
 		Update() // Do the last update with isFastForwarding false to cause UI update 
 
-	if (!isPlaying())
+	if (!isPlaying)
 		drawCanvas()
 }
 

@@ -2,7 +2,8 @@
 
 class AnimationInstance {
 	constructor() {
-		Animations.addAnimation(this)
+		animations.addAnimation(this)
+		requestUpdate();
 	}
 
 	onTick(timePassed) {
@@ -19,10 +20,10 @@ class AnimationInstance {
 	}
 }
 
-var Animations = {
+var animations = {
 
 	addAnimation: function (animation) {
-		Animations.animations.push(animation);
+		animations.animations.push(animation);
     },
 
     animations: [],
@@ -32,36 +33,26 @@ var Animations = {
     },
 
     animationsPlaying: function () {
-		return Animations.animations.length > 0;
+		return animations.animations.length > 0;
     },
 
-	lastUpdate: new Date().getTime(),
-	update: function () {
-		const newTime = new Date().getTime() 
-		const time = (newTime - Animations.lastUpdate) / 1000.0;
-		for (var i = 0; i < Animations.animations.length; i++) {
-			const anim = Animations.animations[i];
+	update: function (time) {
+		for (var i = 0; i < animations.animations.length; i++) {
+			const anim = animations.animations[i];
 			if (anim.shouldDelete()) {
 				anim.onDelete();
-				Animations.animations.splice(i, 1);
+				animations.animations.splice(i, 1);
 				i--;
 				continue;
 			}
 
 			anim.onTick(time);
 		}
-		Animations.lastUpdate = newTime;
-
-
-		// if canvas is not redrawing but we have animations playing, force redraw
-		if (!isPlaying() && Animations.animationsPlaying())
-			drawCanvas()
 	},
 
 	draw: function (context) {
-		for (const anim of Animations.animations)
+		for (const anim of animations.animations)
 			anim.draw(context);
     }
 
 }
-$(() => Animations.redrawTimer = setInterval(Animations.update, frameTime));
