@@ -68,6 +68,7 @@ $(()=>
 
 
 var MapsURL = "Maps/" 
+var HeightmapURL = "Heightmaps/"
 var MapImage = null
 var MapImageWithCombatArea = null
 
@@ -82,6 +83,7 @@ var atlasPNG_loaded = false
 
 var vehicleData
 var KitNameToImageDictionary
+var heightmapData
 
 var ThingsLoading = 1
 function loadIconsAndDictionaries()
@@ -101,6 +103,8 @@ function loadIconsAndDictionaries()
 		atlas = json.atlas;
 		atlasJSON_loaded = true
 		atlasLoaded()
+
+		heightmapData = json.height;
 		
 		//KIT DICTIONARY
 		KitNameToImageDictionary = json.kits
@@ -457,7 +461,7 @@ function stage3LoadingFininshed()
 	MapImage.load(MapsURL + MapName + ".png")
 
 	// Load this map's heightmap raw and configuration
-	heightmap.init("heightmap.raw", null); // TODO
+	heightmap.init(HeightmapURL + MapName + ".raw", heightmapData[MapName]); 
 	
 	// TODO handle unknown flag names.
 	bluforflag = icons[BluForTeam.toLowerCase() + "_cp"]

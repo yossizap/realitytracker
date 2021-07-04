@@ -4,15 +4,15 @@
 var heightmap;
 class Heightmap {
     heightdataview = null;
-    bitresolution = 16;
-    bytesize = 2;
+    bitresolution = null;
+    bytesize = null;
 
-    size = 1025;
-    terrainSize = 4096;
+    size = null;
+    terrainSize = null;
 
-    scalex = 4;
-    scaley = 0.00335693;
-    scalez = 4;
+    scalex = null;
+    scaley = null;
+    scalez = null;
 
     waterlevel = 0;
 
@@ -23,21 +23,29 @@ class Heightmap {
     }
 
     init(link, data) {
-        if (data != null) {
-            this.size = data.size;
-            this.waterlevel = data.waterlevel;
-            this.scalex = data.scalex;
-            this.scaley = data.scaley;
-            this.scalez = data.scalez;
-            this.bitresolution = data.bitresolution;
-            this.bytesize = data.bitresolution / 8;
+        try {
+            this.size = parseInt(data.size.split(" ")[0]);
+            this.terrainSize = parseInt(data.fullsize);
+            //this.waterlevel = parseInt(data.waterlevel);
+            this.scalex = parseFloat(data.scale.split("/")[0]);
+            this.scaley = parseFloat(data.scale.split("/")[1]);
+            this.scalez = parseFloat(data.scale.split("/")[2]);
+            this.bitresolution = parseInt(data.bitresolution); 
+            this.bytesize = this.bitresolution / 8;
+            
+        } catch (e) {
+            console.error(e);
+            console.error("Could not parse heightmap data. Aborting");
+            console.error(data);
         }
+
 
         this._downloadHeightmap(link);
     };
 
     _downloadHeightmap(link) {
         var req = new XMLHttpRequest();
+        console.log("Downloading heightmap: " + link);
         req.open('GET', link);
         req.responseType = "arraybuffer";
         req.onload = (() => {
@@ -47,7 +55,7 @@ class Heightmap {
                 return
             }
 
-            console.log("Heightmap downloaded: " + link);
+            console.log("Heightmap downloaded");
             const buffer = req.response;
 
             this.heightdataview = new DataView(buffer);
@@ -67,10 +75,13 @@ class Heightmap {
             this.readyCallback.push(callback);
     }
 
+    
 
-    getHeightFromOffset(i, j) {
-        const offset = (i * this.size + j) * this.bytesize; 
+    getHeightFromOffset(i, j) {      
+        const offset = (i * this.size + j) * this.bytesize;
         if (offset + this.bytesize - 1 > this.heightdataview.byteLength)
+            return this.waterlevel;
+        if (offset < 0)
             return this.waterlevel;
 
         switch (this.bytesize) {
@@ -85,8 +96,27 @@ class Heightmap {
     };
 
     // TODO
-    getHeightFromCoords(x,z) {
-        return 100.0;
+    getHeightFromCoords(x, z) {
+        x += this.terrainSize / 2;
+        z += this.terrainSize / 2;
+        x /= this.scalex;
+        z /= this.scalez;
+
+        let xint = Math.floor(x);
+        let zint = Math.floor(z);
+        let dx1 = x - xint;
+        let dz1 = z - zint;
+        let dx2 = 1.0 - dx1;
+        let dz2 = 1.0 - dz1;
+        let q11 = this.getHeightFromOffset(zint, xint);
+        let q12 = this.getHeightFromOffset(zint, xint + 1); 
+        let q21 = this.getHeightFromOffset(zint + 1, xint);
+        let q22 = this.getHeightFromOffset(zint + 1, xint + 1); 
+
+        return dx2 * q11 * dz2 +
+            dx2 * q12 * dz1 +
+            dx1 * q21 * dz2 +
+            dx1 * q22 * dz1; 
     }
 
 

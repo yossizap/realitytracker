@@ -160,7 +160,7 @@ class Renderer3d {
         this.cameraPitch = clamp(-80, this.cameraPitch, 80);
     }
     clampPosition() {
-        const height = heightmap.getHeightFromCoords(this.cameraPos[0], -this.cameraPos[2]);
+        const height = heightmap.getHeightFromCoords(this.cameraPos[0], -this.cameraPos[2]) + 3.0;
 
         if (this.cameraPos[1] < height)
             this.cameraPos[1] = height;
