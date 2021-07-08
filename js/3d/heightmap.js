@@ -49,7 +49,7 @@ class Heightmap {
             console.log("Heightmap downloaded");
             this.heightdataview = new DataView(data);
             this.initialized = true;
-        }, "Map image");
+        }, "Map Heightmap");
     }
 
     

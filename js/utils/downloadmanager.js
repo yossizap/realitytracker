@@ -26,6 +26,7 @@ class DownloadManager {
 
 
     download(link, type, callback, name) {
+        console.log("Downloading " + link);
         const typelow = type.toLowerCase();
         const d = {
             link: link,
