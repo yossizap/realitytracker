@@ -426,6 +426,7 @@ function stage3LoadingFininshed()
 	downloadManager.download(MapsURL + MapName + ".png", "image", (img) => {
 		MapImage = img;
 		createMapImageWithCombatArea();
+		requestUpdate();
 	}, "Map image");
 
 
