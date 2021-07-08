@@ -35,8 +35,8 @@ function vehicleTable_Create(id)
 	cell.colSpan = 2
 	cell.innerHTML = ""
 
-	if (v.team != 0 && v.mapImage != null)
-		cell.appendChild(v.mapImage[v.team - 1].cloneNode(false))
+	if (v.team != 0 && v.ns_mapImage != null)
+		cell.appendChild(v.ns_mapImage[v.team - 1].cloneNode(false))
 
 	// Try to find vehicle name in dictionary
 	if (v.name in vehicleData)

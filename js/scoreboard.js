@@ -69,8 +69,8 @@ function playerRow_Update(id)
 	if (p.vehicleid >= 0 && (p.vehicleid in AllVehicles))
 	{
 		var vobj = AllVehicles[p.vehicleid]
-		if (vobj.menuImage != null)
-			row.cells[3].appendChild(vobj.menuImage.cloneNode(false))
+		if (vobj.ns_menuImage != null)
+			row.cells[3].appendChild(vobj.ns_menuImage.cloneNode(false))
 	}
 }
 

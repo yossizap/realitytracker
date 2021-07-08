@@ -1,7 +1,7 @@
 
 
 
-class Geometry2dRenderer {
+class Geometry2dRenderer extends Initializable {
 
     prog = null;
     gpu_attribute_vertices = null;
@@ -13,19 +13,20 @@ class Geometry2dRenderer {
     gpu_buffer_textureCoords = null;
     gpu_uSampler = null;
 
-    dummyGeometry = null;
+    defaultGeometry = null;
     geometries = {};
 
-    red = vec3.set(vec3.create(), 1.0, 0.0, 0.0);
-    green = vec3.set(vec3.create(), 0.0, 1.0, 0.0);
-    blue = vec3.set(vec3.create(), 0.0, 0.25, 1.0);
-    white = vec3.set(vec3.create(), 1.0, 1.0, 1.0);
+    dataReady = true;
+    initialized = false;
 
     constructor() {
-
+        super();
     }
 
     init() {
+        if (this.initialized)
+            return;
+
         const gl = renderer3d.gl;
         const vsSource = `
             attribute vec2 aVertexPosition;
@@ -122,13 +123,14 @@ class Geometry2dRenderer {
             new Float32Array(positions),
             gl.STATIC_DRAW);
 
-        this.dummyGeometry = new Geometry2d(null);
-        renderer3d.addDrawable(this);
+        this.defaultGeometry = new Geometry2d(null);
+
+        this.initialized = true;
     }
 
     getCreate2DGeometry(iconName) {
         if (iconName == null || iconName == "")
-            return this.dummyGeometry;
+            return this.defaultGeometry;
 
         let geometry = this.geometries[iconName];
         if (geometry === undefined) {
@@ -138,49 +140,36 @@ class Geometry2dRenderer {
         return geometry;
     }
 
-    drawVehicle(i) {
-        const v = AllVehicles[i]
-        const imageName = v.mapImageName;
-        const geometry = this.getCreate2DGeometry(imageName);
 
-        let color;
-        if (v.team == 1)
-            color = this.red;
-        else
-            color = this.blue;
+    //drawProj(p) {
+    //    const proj = AllProj[p];
+    //    if (proj.ns_isFast && Math.abs(proj.ns_lastX - proj.X) < 10
+    //        && Math.abs(proj.ns_lastY - proj.Y) < 10
+    //        && Math.abs(proj.ns_lastZ - proj.Z) < 10)
+    //        return
 
-        const pos3 = v.getPos();
-        pos3[1] += 8.0;
-        geometry.draw(pos3, ((v.getRotation() + renderer3d.cameraYaw) / 180.0 * Math.PI), color);
-    }
+    //    let color;
+    //    if (proj.player != null) {
+    //        const p = proj.player
+    //        if (SelectedPlayer == p.id) {
+    //            color = this.white;
+    //        }
+    //        else if (p.team == SelectedSquadTeam && p.squad == SelectedSquadNumber) {
+    //            color = this.green;
+    //        } else {
+    //            color = p.team == 1 ? this.red : this.blue;
+    //        }
+    //    }
 
-    drawProj(p) {
-        const proj = AllProj[p];
-        if (proj.ns_isFast && Math.abs(proj.ns_lastX - proj.X) < 10
-            && Math.abs(proj.ns_lastY - proj.Y) < 10
-            && Math.abs(proj.ns_lastZ - proj.Z) < 10)
-            return
+    //    const imageName = proj.ns_iconName;
+    //    const geometry = this.getCreate2DGeometry(imageName);
 
-        let color;
-        if (proj.player != null) {
-            const p = proj.player
-            if (SelectedPlayer == p.id) {
-                color = this.white;
-            }
-            else if (p.team == SelectedSquadTeam && p.squad == SelectedSquadNumber) {
-                color = this.green;
-            } else {
-                color = p.team == 1 ? this.red : this.blue;
-            }
-        }
+    //    const pos3 = proj.getPos();
+    //    pos3[1] += 8.0;
+    //    geometry.draw(pos3, ((proj.getRotation() + renderer3d.cameraYaw) / 180.0 * Math.PI), color);
+    //}
 
-        const imageName = proj.ns_iconName;
-        const geometry = this.getCreate2DGeometry(imageName);
 
-        const pos3 = proj.getPos();
-        pos3[1] += 8.0;
-        geometry.draw(pos3, ((proj.getRotation() + renderer3d.cameraYaw) / 180.0 * Math.PI), color);
-    }
 
     draw() {
         const gl = renderer3d.gl;
@@ -205,11 +194,12 @@ class Geometry2dRenderer {
         gl.vertexAttribPointer(textureCoordsAttribute, 2, gl.FLOAT, false, 8, 0);
         gl.enableVertexAttribArray(textureCoordsAttribute);
 
-        for (var i in AllVehicles)
-            this.drawVehicle(i);
-        for (var i in AllProj)
-            this.drawProj(i)
-                
+        gl.activeTexture(gl.TEXTURE0);
+        gl.uniform1i(geometry2dRenderer.gpu_uSampler, 0);
+
+
+        //for (var i in AllProj)
+        //    this.drawProj(i)     
     }
 }
 
@@ -248,9 +238,9 @@ class Geometry2d {
         const gl = renderer3d.gl;
 
         // set texture
-        gl.activeTexture(gl.TEXTURE0);
+        
         gl.bindTexture(gl.TEXTURE_2D, this.texture);
-        gl.uniform1i(geometry2dRenderer.gpu_uSampler, 0);
+
 
 
         gl.uniform1f(geometry2dRenderer.gpu_uniform_rot, rot);       

@@ -5,7 +5,7 @@
 const HEIGHTMAP_STRIDE_SIZE = 5 * 4
 
 var terrainRenderer;
-class TerrainRenderer {
+class TerrainRenderer extends Initializable {
     indices = null;
     TERRAINSEGMENT_SIZE = 128;
     TERRAINSEGMENT_LODSIZE = [129];
@@ -24,19 +24,31 @@ class TerrainRenderer {
     gpu_uSampler = null;
 
     segments = [];
+
     constructor() {
+        super();
+
         for (let i = 0; i < this.TERRAINSEGMENT_LODSIZE.length; i++)
             this.TERRAINSEGMENT_LODINDEXSIZE.push(this._getElementCount(this.TERRAINSEGMENT_LODSIZE[i]))
+        this.dataReady = true;
+    }
+
+    getIsDataReady() {
+        return MapImage != null && heightmap.initialized;
     }
 
     init() {
+        if (this.initialized)
+            return true;
+
         const gl = renderer3d.gl;
-        renderer3d.addDrawable(this);
 
         this._createIndicesBuffers(gl);
         this._loadMapImageAsTexture();
-
         this._createProgram();
+        this._createSegments();
+        this.initialized = true;
+        return true;
     }
 
     _createProgram() {
@@ -92,10 +104,6 @@ class TerrainRenderer {
         console.log("TERRAIN: Compiled terrain shaders");
     }
 
-    initVertices() {
-        this._createSegments();
-    }
-
     // Create coords for the vertices of the heightmap 
     // Cut heightmap into 129x129 segments.
     _createSegments() {
@@ -112,7 +120,7 @@ class TerrainRenderer {
     };
 
     _loadMapImageAsTexture() {
-        if (!MapImageReady) {
+        if (MapImage == null) {
             console.error("TERRAIN: Called load texture for map when map isn't ready");
             return;
         }

@@ -349,11 +349,18 @@ function toggle3dMode() {
 		$("#map")[0].style.display = "block";
 		$("#map3d")[0].style.display = "none";
 	} else {
+		if (!renderer3d.initalized) {
+			if (!renderer3d.init()) {
+				console.log("3d not ready yet");
+				return;
+            }
+        }
+			
+
 		is3DMode = true;
 		activeRenderer = renderer3d;
 		$("#map")[0].style.display = "none";
 		$("#map3d")[0].style.display = "block";
-		renderer3d.init();
 		renderer3d.draw();
     }
 

@@ -16,7 +16,8 @@ class Heightmap {
 
     waterlevel = 0;
 
-    ready = false;
+    dataReady = true;
+    initialized = false;
 
     constructor() {
 
@@ -44,35 +45,11 @@ class Heightmap {
     };
 
     _downloadHeightmap(link) {
-        var req = new XMLHttpRequest();
-        console.log("Downloading heightmap: " + link);
-        req.open('GET', link);
-        req.responseType = "arraybuffer";
-        req.onload = (() => {
-
-            if (req.status != 0 && req.status != 200 && req.status != 304) {
-                console.error("Could not download heightmap. Error code " + req.status)
-                return
-            }
-
+        downloadManager.download(link, "bin", (data) => {
             console.log("Heightmap downloaded");
-            const buffer = req.response;
-
-            this.heightdataview = new DataView(buffer);
-
-            this.ready = true;
-            for (let callback of this.readyCallback)
-                callback();
-        });
-        req.send();
-    }
-
-    readyCallback = []
-    callOnReady(callback) {
-        if (this.ready)
-            callback();
-        else
-            this.readyCallback.push(callback);
+            this.heightdataview = new DataView(data);
+            this.initialized = true;
+        }, "Map image");
     }
 
     

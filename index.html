@@ -6,6 +6,8 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 	<link rel="stylesheet" href="jquery-ui.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+	<script src="js/utils/initializable.js"></script>
+	<script src="js/utils/downloadmanager.js"></script>
 	<script src="js/animations.js"></script>
 	<script src="js/canvas.js"></script>
 	<script src="js/atlas.js"></script>
@@ -31,12 +33,17 @@
 	<script src="js/3d/heightmap.js"></script>
 	<script src="js/3d/terrain.js"></script>
 	<script src="js/3d/geometry2d.js"></script>
+	<script src="js/3d/geometry.js"></script>
 	<script>if (window.module) module = window.module;</script>
 	<!-- <script src="js/init_prt.js"></script> -->
 	<link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="style.css">
 </head>
 	<body>
+		<div id="downloads">
+			<table id="downloadsTable">
+			</table>
+		</div>
 		<div id="loadingStatusOverlay">
 			DOM Loading...
 		</div>
@@ -281,135 +288,135 @@
 				</table>
 			</div>
 		</div>
-			<div id="mainContainer" class="hideAtStart">
-				<ul id="menuList">
-					<li>
-						<div>Menus</div>
-						<ul>
-							<li><div onclick="toggleSubMenu('scoreBoard')">ScoreBoard (Z)</div></li>
-							<li><div onclick="toggleSubMenu('kills')">Kills (X)</div></li>
-							<li><div onclick="toggleSubMenu('chat')">Chat (T)</div></li>
-							<li><div onclick="toggleSubMenu('revives')">Revives (R)</div></li>
-							<li><div onclick="toggleSubMenu('kitAllocations')">Kit Allocations (K)</div></li>
-							<li><div onclick="toggleSubMenu('vehicles')">Active Vehicles (C)</div></li>
-							<li><div onclick="toggleSubMenu('vehicleDestroyers')">Vehicles Destroyed (D)</div>
-							<li><div onclick="toggleSubMenu('serverinfo')">Server Info</div>
-						</ul>
-					</li>
-				</ul>
-				<div id="toggleBookmarks" class="subMenuToggle" onclick="toggleSubMenu('bookmarks')">
-					<img src=".\Graphics\UI\star.png">
-				</div>
-				<div id="copyLink" class="subMenuToggle" onclick="copyTrackerLink()">
-					<!-- From Microsoft: https://github.com/microsoft/fluentui-system-icons -->
-					<svg width="30px" height="30px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-						<!-- Generator: Sketch 59.1 (86144) - https://sketch.com -->
-						<title>Copy link with timestamp</title>
-						<desc>Created with Sketch.</desc>
-						<g id="🔍-Product-Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-							<g id="ic_fluent_copy_24_regular" fill="#FFFFFF" fill-rule="nonzero">
-								<path d="M5.50280381,4.62704038 L5.5,6.75 L5.5,17.2542087 C5.5,19.0491342 6.95507456,20.5042087 8.75,20.5042087 L17.3662868,20.5044622 C17.057338,21.3782241 16.2239751,22.0042087 15.2444057,22.0042087 L8.75,22.0042087 C6.12664744,22.0042087 4,19.8775613 4,17.2542087 L4,6.75 C4,5.76928848 4.62744523,4.93512464 5.50280381,4.62704038 Z M17.75,2 C18.9926407,2 20,3.00735931 20,4.25 L20,17.25 C20,18.4926407 18.9926407,19.5 17.75,19.5 L8.75,19.5 C7.50735931,19.5 6.5,18.4926407 6.5,17.25 L6.5,4.25 C6.5,3.00735931 7.50735931,2 8.75,2 L17.75,2 Z M17.75,3.5 L8.75,3.5 C8.33578644,3.5 8,3.83578644 8,4.25 L8,17.25 C8,17.6642136 8.33578644,18 8.75,18 L17.75,18 C18.1642136,18 18.5,17.6642136 18.5,17.25 L18.5,4.25 C18.5,3.83578644 18.1642136,3.5 17.75,3.5 Z" id="🎨-Color"></path>
-							</g>
+		<div id="mainContainer" class="hideAtStart">
+			<ul id="menuList">
+				<li>
+					<div>Menus</div>
+					<ul>
+						<li><div onclick="toggleSubMenu('scoreBoard')">ScoreBoard (Z)</div></li>
+						<li><div onclick="toggleSubMenu('kills')">Kills (X)</div></li>
+						<li><div onclick="toggleSubMenu('chat')">Chat (T)</div></li>
+						<li><div onclick="toggleSubMenu('revives')">Revives (R)</div></li>
+						<li><div onclick="toggleSubMenu('kitAllocations')">Kit Allocations (K)</div></li>
+						<li><div onclick="toggleSubMenu('vehicles')">Active Vehicles (C)</div></li>
+						<li><div onclick="toggleSubMenu('vehicleDestroyers')">Vehicles Destroyed (D)</div>
+						<li><div onclick="toggleSubMenu('serverinfo')">Server Info</div>
+					</ul>
+				</li>
+			</ul>
+			<div id="toggleBookmarks" class="subMenuToggle" onclick="toggleSubMenu('bookmarks')">
+				<img src=".\Graphics\UI\star.png">
+			</div>
+			<div id="copyLink" class="subMenuToggle" onclick="copyTrackerLink()">
+				<!-- From Microsoft: https://github.com/microsoft/fluentui-system-icons -->
+				<svg width="30px" height="30px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+					<!-- Generator: Sketch 59.1 (86144) - https://sketch.com -->
+					<title>Copy link with timestamp</title>
+					<desc>Created with Sketch.</desc>
+					<g id="🔍-Product-Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+						<g id="ic_fluent_copy_24_regular" fill="#FFFFFF" fill-rule="nonzero">
+							<path d="M5.50280381,4.62704038 L5.5,6.75 L5.5,17.2542087 C5.5,19.0491342 6.95507456,20.5042087 8.75,20.5042087 L17.3662868,20.5044622 C17.057338,21.3782241 16.2239751,22.0042087 15.2444057,22.0042087 L8.75,22.0042087 C6.12664744,22.0042087 4,19.8775613 4,17.2542087 L4,6.75 C4,5.76928848 4.62744523,4.93512464 5.50280381,4.62704038 Z M17.75,2 C18.9926407,2 20,3.00735931 20,4.25 L20,17.25 C20,18.4926407 18.9926407,19.5 17.75,19.5 L8.75,19.5 C7.50735931,19.5 6.5,18.4926407 6.5,17.25 L6.5,4.25 C6.5,3.00735931 7.50735931,2 8.75,2 L17.75,2 Z M17.75,3.5 L8.75,3.5 C8.33578644,3.5 8,3.83578644 8,4.25 L8,17.25 C8,17.6642136 8.33578644,18 8.75,18 L17.75,18 C18.1642136,18 18.5,17.6642136 18.5,17.25 L18.5,4.25 C18.5,3.83578644 18.1642136,3.5 17.75,3.5 Z" id="🎨-Color"></path>
 						</g>
-					</svg>
-				</div>
-				<div id="mapOptions">
-					<label id="mapOptionsButton" class="cursorPointer">
-						<input type="checkbox" id="mapOtionsInput">
-						<div id="mapOptionsDiv">
-							<input type="checkbox" checked="" id="options_DrawDOD" onclick="checkboxClicked(this)">
-							DoD
-							<br>
-							<input type="checkbox" checked="" id="options_DrawEmptyVehicles" onclick="checkboxClicked(this)">
-							Empty vehicles
-							<br>
-							<input type="checkbox" checked="" id="options_DrawFlagRadius" onclick="checkboxClicked(this)">
-							Flag radius
-							<br>
-							<input type="checkbox" checked="" id="options_DrawKillLines" onclick="checkboxClicked(this)">
-							Kill lines
-							<br>
-							<input type="checkbox" checked="" id="options_DrawKitIcons" onclick="checkboxClicked(this)">
-							Kit icons
-							<br>
-							<input type="checkbox" checked="" id="options_ClampVehiclesToMap" onclick="checkboxClicked(this)">
-							Clamp vehicles in map
-							<br>
-							<input type="checkbox" checked="" id="options_DrawVehicleHeight" onclick="checkboxClicked(this)">
-							Show air vehicle height
-							<br>
-							<input type="checkbox" checked="" id="options_health_vehicles" onclick="checkboxClicked(this)">
-							Vehicle Health
-							<br>
-							<input type="checkbox" checked="" id="options_health_players" onclick="checkboxClicked(this)">
-							Player Health
-							<br>
-							<input type="checkbox" id="options_drawAllOrderIcons" onclick="checkboxClicked(this)">
-							Orders
-							<br>
-							<input id="options_canvasScale" type="range" min="0.75" max="3.0" value="1.0" step="0.02" oninput="UIScaleChange()">
-							UI Scale
-							<br>
-						</div>
-					</label>
-					<img src=".\Graphics\UI\stacks.png">
-				</div>
-				<div id="mapDiv">
-					<div id="renderers">
-						<canvas id="map"></canvas>
-						<canvas id="map3d" style="display: none;"></canvas>
+					</g>
+				</svg>
+			</div>
+			<div id="mapOptions">
+				<label id="mapOptionsButton" class="cursorPointer">
+					<input type="checkbox" id="mapOtionsInput">
+					<div id="mapOptionsDiv">
+						<input type="checkbox" checked="" id="options_DrawDOD" onclick="checkboxClicked(this)">
+						DoD
+						<br>
+						<input type="checkbox" checked="" id="options_DrawEmptyVehicles" onclick="checkboxClicked(this)">
+						Empty vehicles
+						<br>
+						<input type="checkbox" checked="" id="options_DrawFlagRadius" onclick="checkboxClicked(this)">
+						Flag radius
+						<br>
+						<input type="checkbox" checked="" id="options_DrawKillLines" onclick="checkboxClicked(this)">
+						Kill lines
+						<br>
+						<input type="checkbox" checked="" id="options_DrawKitIcons" onclick="checkboxClicked(this)">
+						Kit icons
+						<br>
+						<input type="checkbox" checked="" id="options_ClampVehiclesToMap" onclick="checkboxClicked(this)">
+						Clamp vehicles in map
+						<br>
+						<input type="checkbox" checked="" id="options_DrawVehicleHeight" onclick="checkboxClicked(this)">
+						Show air vehicle height
+						<br>
+						<input type="checkbox" checked="" id="options_health_vehicles" onclick="checkboxClicked(this)">
+						Vehicle Health
+						<br>
+						<input type="checkbox" checked="" id="options_health_players" onclick="checkboxClicked(this)">
+						Player Health
+						<br>
+						<input type="checkbox" id="options_drawAllOrderIcons" onclick="checkboxClicked(this)">
+						Orders
+						<br>
+						<input id="options_canvasScale" type="range" min="0.75" max="3.0" value="1.0" step="0.02" oninput="UIScaleChange()">
+						UI Scale
+						<br>
 					</div>
-					<div id="controlBarContainer">
-						<button id="startPauseButton" class="state-paused" type="button" onclick="togglePlay()">
-							<div class="play-icon">
-								<svg viewBox="0 0 20 20" preserveAspectRatio="xMidYMid" tabindex="-1" class=""><polygon class="fill" points="1,0 20,10 1,20"></polygon></svg>
-							</div>
-							<div class="pause-icon">
-								<svg viewBox="0 0 20 20" preserveAspectRatio="xMidYMid" tabindex="-1"><rect class="fill" width="6" height="100%" x="0" y="0"></rect><rect class="fill" width="6" height="100%" x="12" y="0"></rect></svg>
-							</div>
-						</button>
-						<div id="controlBar">
-							<label id="playBarLabel">
-								<input id="playBar" type="range" min="0" max="1" step="1" value="0" oninput="onPlayBarChange()" />
-								<div id="playBarBubble"></div>
+				</label>
+				<img src=".\Graphics\UI\stacks.png">
+			</div>
+			<div id="mapDiv">
+				<div id="renderers">
+					<canvas id="map"></canvas>
+					<canvas id="map3d" style="display: none;"></canvas>
+				</div>
+				<div id="controlBarContainer">
+					<button id="startPauseButton" class="state-paused" type="button" onclick="togglePlay()">
+						<div class="play-icon">
+							<svg viewBox="0 0 20 20" preserveAspectRatio="xMidYMid" tabindex="-1" class=""><polygon class="fill" points="1,0 20,10 1,20"></polygon></svg>
+						</div>
+						<div class="pause-icon">
+							<svg viewBox="0 0 20 20" preserveAspectRatio="xMidYMid" tabindex="-1"><rect class="fill" width="6" height="100%" x="0" y="0"></rect><rect class="fill" width="6" height="100%" x="12" y="0"></rect></svg>
+						</div>
+					</button>
+					<div id="controlBar">
+						<label id="playBarLabel">
+							<input id="playBar" type="range" min="0" max="1" step="1" value="0" oninput="onPlayBarChange()" />
+							<div id="playBarBubble"></div>
+						</label>
+						<div id="addBookmarkButton" class="cursorPointer" title="Add Bookmark" onclick='$("#addbookmarkComment").dialog("open")'>&#x2730;</div>
+						<div id="controlBarOptions">
+							<svg x="0px" y="0px" width="30px" height="30px" viewBox="0 0 40 40" enable-background="new 0 0 40 40" xml:space="preserve" bodyBackgroundColor="rgba(255,255,255,0)">
+							<path transform="matrix(0.8101235312460657 0.5862592123978987 -0.5862592123978987 0.8101235312460657 29.975031174922556 11.636442661048283)" width="5.761511216056682" height="19.220779220779207" stroke-width="0.9999999999999997" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M0,-3.1086244689504383e-15 L-5.761511216056682,5.773159728050814e-15 L-5.761511216056675,19.220779220779203 L0,19.220779220779203 L0,-3.1086244689504383e-15 Z " />
+
+							<path transform="matrix(0.9957592516932394 -0.09199735141469921 0.09199735141469921 0.9957592516932394 8.878225575584047 31.373540173431767)" width="8.97284533648169" height="9.775678866587938" stroke-width="1.951924223335662" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M3.552713678800501e-15,-4.973799150320701e-14 L8.972845336481694,-9.775678866587988 " />
+
+							<path transform="matrix(0.830062596210468 -0.5576702308464527 0.5576702308464527 0.830062596210468 1.1985338022710756 31.135220023443903)" width="7.102930105749799" height="4.547710917954465" stroke-width="1.9999999999999993" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M-1.4210854715202004e-14,-1.4210854715202004e-14 L7.102930105749785,4.547710917954451 " />
+
+							<path transform="matrix(0.9915096382957684 0.13003321562814005 -0.13003321562814005 0.9915096382957684 15.419854232075359 23.970642249905524)" width="10.851982609793112" height="6.039315158787566" stroke-width="2.2788796040368786" stroke-miterlimit="3" stroke="#fff" fill="#000000" d="M0,0 L10.851982609793112,6.039315158787566 " />
+
+							<path transform="matrix(0.9926024522949254 -0.12140993245241759 0.12140993245241759 0.9926024522949254 25.528058759919183 30.115229863680206)" width="5.591821619738965" height="6.53459198276898" stroke-width="2.0486818195100196" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M-1.4210854715202004e-14,-1.4210854715202004e-14 L-5.59182161973898,6.534591982768966 " />
+
+							<path transform="matrix(0.9582582150495895 -0.28590416801784246 0.28590416801784246 0.9582582150495895 29.19762323604641 11.643998448916042)" width="4.3614259360517735" height="5.738389306327562" stroke-width="2.0674102392772857" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M-7.105427357601002e-15,3.552713678800501e-15 L4.361425936051766,5.738389306327566 " />
+
+							<path transform="matrix(0.9582582150495895 -0.2859041680178422 0.2859041680178422 0.9582582150495895 33.93803294535569 15.685719794526246)" width="5.665736738232873" height="3.7578952711596045" stroke-width="2" stroke-miterlimit="3" stroke="#fff" fill="#000000" d="M0,0 L5.665736738232873,-3.7578952711596045 " />
+
+							<path transform="matrix(1 0 0 1 25.17119244391997 8.595041322314046)" width="8.170011806375438" height="0.4250295159386077" stroke-width="2" stroke-miterlimit="3" stroke="#fff" fill="#000000" d="M0,0 L-8.170011806375438,-0.4250295159386077 " />
+
+							<path transform="matrix(1 0 0 1 17.756788665879938 7.8866587957497)" width="4.108618654073204" height="4.9586776859504145" stroke-width="2" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M0,0 L-4.108618654073204,4.9586776859504145 " />
+
+							<path transform="matrix(1 0 0 1 27.29634002361319 2.8807556080283296)" width="6.785533901003767" height="6.738308399232816" stroke-width="2" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M0,3.369154199616408 C0,1.5084215463120998 1.5189933337973407,0 3.3927669505018834,0 C5.266540567206426,0 6.785533901003767,1.5084215463120998 6.785533901003767,3.369154199616408 C6.785533901003767,5.229886852920716 5.266540567206426,6.738308399232816 3.3927669505018834,6.738308399232816 C1.5189933337973407,6.738308399232816 0,5.229886852920716 0,3.369154199616408 Z " />
+
+							<path transform="matrix(1 0 0 1 11.569843648486714 11.684357142408704)" width="8.736717827626919" height="0.04722550177095641" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M0,-1.7763568394002505e-15 L-8.736717827626919,0.047225501770954637 " />
+
+							<path transform="matrix(1 0 0 1 11.33412042502955 15.631641086186534)" width="8.500590318772137" stroke-miterlimit="3" stroke="#fff" fill="#fff" d="M0,0 L-8.500590318772137,0 " />
+
+							<path transform="matrix(1 0 0 1 11.381345926800485 19.64580873671782)" width="8.64226682408502" height="0.04722550177095641" stroke-width="1.0499569698583933" stroke-miterlimit="3" stroke="#fff" fill="#000000" d="M-3.552713678800501e-15,0 L-8.642266824085024,0.04722550177095641 " />
+
+				</svg>
+							<label id="playSpeedLabel">
+								<input id="playSpeed" orient="vertical" type="range" min="0.7" max="7" step="0.05" value="1" oninput="onPlaySpeedChange()" />
 							</label>
-							<div id="addBookmarkButton" class="cursorPointer" title="Add Bookmark" onclick='$("#addbookmarkComment").dialog("open")'>&#x2730;</div>
-							<div id="controlBarOptions">
-								<svg x="0px" y="0px" width="30px" height="30px" viewBox="0 0 40 40" enable-background="new 0 0 40 40" xml:space="preserve" bodyBackgroundColor="rgba(255,255,255,0)">
-								<path transform="matrix(0.8101235312460657 0.5862592123978987 -0.5862592123978987 0.8101235312460657 29.975031174922556 11.636442661048283)" width="5.761511216056682" height="19.220779220779207" stroke-width="0.9999999999999997" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M0,-3.1086244689504383e-15 L-5.761511216056682,5.773159728050814e-15 L-5.761511216056675,19.220779220779203 L0,19.220779220779203 L0,-3.1086244689504383e-15 Z " />
-
-								<path transform="matrix(0.9957592516932394 -0.09199735141469921 0.09199735141469921 0.9957592516932394 8.878225575584047 31.373540173431767)" width="8.97284533648169" height="9.775678866587938" stroke-width="1.951924223335662" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M3.552713678800501e-15,-4.973799150320701e-14 L8.972845336481694,-9.775678866587988 " />
-
-								<path transform="matrix(0.830062596210468 -0.5576702308464527 0.5576702308464527 0.830062596210468 1.1985338022710756 31.135220023443903)" width="7.102930105749799" height="4.547710917954465" stroke-width="1.9999999999999993" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M-1.4210854715202004e-14,-1.4210854715202004e-14 L7.102930105749785,4.547710917954451 " />
-
-								<path transform="matrix(0.9915096382957684 0.13003321562814005 -0.13003321562814005 0.9915096382957684 15.419854232075359 23.970642249905524)" width="10.851982609793112" height="6.039315158787566" stroke-width="2.2788796040368786" stroke-miterlimit="3" stroke="#fff" fill="#000000" d="M0,0 L10.851982609793112,6.039315158787566 " />
-
-								<path transform="matrix(0.9926024522949254 -0.12140993245241759 0.12140993245241759 0.9926024522949254 25.528058759919183 30.115229863680206)" width="5.591821619738965" height="6.53459198276898" stroke-width="2.0486818195100196" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M-1.4210854715202004e-14,-1.4210854715202004e-14 L-5.59182161973898,6.534591982768966 " />
-
-								<path transform="matrix(0.9582582150495895 -0.28590416801784246 0.28590416801784246 0.9582582150495895 29.19762323604641 11.643998448916042)" width="4.3614259360517735" height="5.738389306327562" stroke-width="2.0674102392772857" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M-7.105427357601002e-15,3.552713678800501e-15 L4.361425936051766,5.738389306327566 " />
-
-								<path transform="matrix(0.9582582150495895 -0.2859041680178422 0.2859041680178422 0.9582582150495895 33.93803294535569 15.685719794526246)" width="5.665736738232873" height="3.7578952711596045" stroke-width="2" stroke-miterlimit="3" stroke="#fff" fill="#000000" d="M0,0 L5.665736738232873,-3.7578952711596045 " />
-
-								<path transform="matrix(1 0 0 1 25.17119244391997 8.595041322314046)" width="8.170011806375438" height="0.4250295159386077" stroke-width="2" stroke-miterlimit="3" stroke="#fff" fill="#000000" d="M0,0 L-8.170011806375438,-0.4250295159386077 " />
-
-								<path transform="matrix(1 0 0 1 17.756788665879938 7.8866587957497)" width="4.108618654073204" height="4.9586776859504145" stroke-width="2" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M0,0 L-4.108618654073204,4.9586776859504145 " />
-
-								<path transform="matrix(1 0 0 1 27.29634002361319 2.8807556080283296)" width="6.785533901003767" height="6.738308399232816" stroke-width="2" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M0,3.369154199616408 C0,1.5084215463120998 1.5189933337973407,0 3.3927669505018834,0 C5.266540567206426,0 6.785533901003767,1.5084215463120998 6.785533901003767,3.369154199616408 C6.785533901003767,5.229886852920716 5.266540567206426,6.738308399232816 3.3927669505018834,6.738308399232816 C1.5189933337973407,6.738308399232816 0,5.229886852920716 0,3.369154199616408 Z " />
-
-								<path transform="matrix(1 0 0 1 11.569843648486714 11.684357142408704)" width="8.736717827626919" height="0.04722550177095641" stroke-miterlimit="3" stroke="#000000" fill="#fff" d="M0,-1.7763568394002505e-15 L-8.736717827626919,0.047225501770954637 " />
-
-								<path transform="matrix(1 0 0 1 11.33412042502955 15.631641086186534)" width="8.500590318772137" stroke-miterlimit="3" stroke="#fff" fill="#fff" d="M0,0 L-8.500590318772137,0 " />
-
-								<path transform="matrix(1 0 0 1 11.381345926800485 19.64580873671782)" width="8.64226682408502" height="0.04722550177095641" stroke-width="1.0499569698583933" stroke-miterlimit="3" stroke="#fff" fill="#000000" d="M-3.552713678800501e-15,0 L-8.642266824085024,0.04722550177095641 " />
-
-					</svg>
-								<label id="playSpeedLabel">
-									<input id="playSpeed" orient="vertical" type="range" min="0.7" max="7" step="0.05" value="1" oninput="onPlaySpeedChange()" />
-								</label>
-							</div>
 						</div>
 					</div>
 				</div>
 			</div>
-</body>
+		</div>
+	</body>
 </html>

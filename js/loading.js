@@ -235,11 +235,9 @@ function loadLiveDemo(IP,Port,Username,Password)
 	//Wait for callback from onConnect and go to stage3 finished
 }
 
-const CORS_PROXY = "https://cors-anywhere.herokuapp.com/"
-
 var demoLink = null;
 //LoadDemo from URL
-function loadDemo(link, CredsNeeded, forceCorsProxy)
+function loadDemo(link, CredsNeeded)
 {
 	if (link == "")
 		return false
@@ -251,14 +249,11 @@ function loadDemo(link, CredsNeeded, forceCorsProxy)
 	try {
 		var url = new URL(link);
 		originalProtocol = url.protocol;
-		if (window.location.protocol != "file:" && !forceCorsProxy)
+		if (window.location.protocol != "file:")
 			url.protocol = window.location.protocol;
 		link = url.href;
 	} catch (err) { }
 	
-
-	if (forceCorsProxy)
-		link = CORS_PROXY + link
 
 
 	demoLink = link;
@@ -279,10 +274,6 @@ function loadDemo(link, CredsNeeded, forceCorsProxy)
 	req.withCredentials = CredsNeeded
 	req.responseType = "arraybuffer";
 
-	// Required for firefox?
-	if (forceCorsProxy)
-		req.setRequestHeader('X-Requested-With', 'XMLHttpRequest') 
-	///
 
 	req.onload = () =>
 	{
@@ -320,24 +311,9 @@ function loadDemo(link, CredsNeeded, forceCorsProxy)
 	}
 	req.onerror= e => 
 	{
-		if (!forceCorsProxy) {
 			// Due to security reasons, its impossible to tell if network failure was due to CORS.
 			console.log("Network error, retrying with cors proxy")
 			setLoadingOverlayText("Error downloading demo file, retrying with CORS proxy...")
-
-			// Restore protocol, cors-proxy is HTTPs and target may require HTTP
-			try {
-				var url = new URL(link);
-				url.protocol = originalProtocol;
-				link = url.href;
-			} catch (err) { }
-
-			// never do creds with cors proxy, they strip headers anyways
-			return loadDemo(link, false, true);
-		} else {
-			setLoadingOverlayText("Network error downloading demo file.")
-			console.log(e)
-        }
 	}
 	
 	req.send();
@@ -363,8 +339,7 @@ function loadDemoFromFile()
 
 
 
-var isParsingDone=false
-var isMapDownloadingDone = false
+var isParsingDone = false
 
 // Temp workaround until v4. I want to get rid of that mapdata.json completely for now.
 const mapSizeDict = {
@@ -433,7 +408,7 @@ const mapSizeDict = {
 function stage3LoadingFininshed()
 {
 	hideDemoSelectionInterface()
-	setLoadingOverlayText("Loading map image... 0%")
+	setLoadingOverlayText("Parsing demo")
 	
 	
 	//Read up to server details message, update things like map name, layer, gamemode, team names.
@@ -448,17 +423,12 @@ function stage3LoadingFininshed()
 	}
 	
 	//Load this map's image
-	MapImage = new Image()
-	MapImage.onprogress = updateLoadingStatus
-	MapImage.onerror= () => setLoadingOverlayText("Error downloading map image.")
-	MapImage.onload= () =>
-	{
-		isMapDownloadingDone = true
-		updateLoadingStatus()
-		if (isParsingDone) 
-			setTimeout(stage4LoadingFininshed,5)
-	}
-	MapImage.load(MapsURL + MapName + ".png")
+	downloadManager.download(MapsURL + MapName + ".png", "image", (img) => {
+		MapImage = img;
+		createMapImageWithCombatArea();
+	}, "Map image");
+
+
 
 	// Load this map's heightmap raw and configuration
 	heightmap.init(HeightmapURL + MapName + ".raw", heightmapData[MapName]); 
@@ -504,19 +474,15 @@ function ParseDemo_End()
 	isParsingDone = true
 	InitialParse = false
 	updateLoadingStatus()
-	if (isMapDownloadingDone)
-		setTimeout(stage4LoadingFininshed,5)
+	stage4LoadingFininshed();
 }
 
 
 
-var MapImageReady = false
-
-//called when map downloading + demo parsing stage finishes
+//called when demo parsing stage finishes
 function stage4LoadingFininshed()
 {
 	writeServerInfoTable()
-	createMapImageWithCombatArea()
 	//Remove status overlay
 	setLoadingOverlayText("")
 	
@@ -529,8 +495,6 @@ function stage4LoadingFininshed()
 	
 	//Show the demo interface
 	showInterface()
-	
-	MapImageReady = true; 
 	
 	Reset()
 	
@@ -614,9 +578,8 @@ function showInterface()
 
 function updateLoadingStatus()
 {
-	const T1 = MapImage.completedPercentage == 100 ? "Done" : MapImage.completedPercentage + "%"
 	const T2 = isParsingDone ? "Done" : Tick_Count
-	setLoadingOverlayText("Loading map image and Parsing demo.<br> Map download: " + T1 + "<br>Ticks Parsed: "+T2)
+	setLoadingOverlayText("Parsing demo<br>Ticks Parsed: "+T2)
 }
 
 function setLoadingOverlayText(Text)

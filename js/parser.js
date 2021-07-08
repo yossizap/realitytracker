@@ -108,6 +108,8 @@ class GameObject
 		this.Y = Y
 		this.Z = Z
 		this.team = 0;
+		this.ns_geom = null;
+		this.ns_geomName = "";
 	}
 	getX() {
 		return this.X;
@@ -128,9 +130,6 @@ class GameObject
 	getCanvasY() {
 		return YtoCanvas(this.getZ())
 	}
-	getTeamColor2d() {
-
-	}
 	getTeamColor3d() {
 		switch (this.team) {
 			case 0: return renderer3d.white;
@@ -138,6 +137,14 @@ class GameObject
 			case 2: return renderer3d.blue;
         }
 	}
+	getGeometry() {
+		if (this.ns_geom == null) {
+			//this.ns_geom = renderer3d.getGeometry(this.ns_geomName); 
+			this.ns_geom = renderer3d.getGeometry3d(this.ns_geomName); // TEMP
+        }
+			
+		return this.ns_geom;
+    }
 	onLoadState() {}
 }
 
@@ -233,7 +240,15 @@ class PlayerObject extends InterpolatedGameObject
 			else
 				console.log("Parser: unknown kit name " + this.kit)
 		}
-    }
+	}
+	getTeamColor3d() {
+		if (SelectedPlayer == this.id)
+			color = renderer3d.white;
+		else if (this.team == SelectedSquadTeam && this.squad == SelectedSquadNumber)
+			return renderer3d.green;
+		else
+			return this.team == 1 ? renderer3d.red : renderer3d.blue;
+	}
 
 }
 
@@ -489,9 +504,8 @@ class VehicleObject extends InterpolatedGameObject
 		this.isFlyingVehicle = false
 		this.isClimbingVehicle = false
 
-		this.menuImage = null
-		this.mapImage = coloredIcons["mini_shp_light"]
-		this.mapImageName = "mini_shp_light";
+		this.ns_menuImage = null
+		this.ns_mapImage = coloredIcons["mini_shp_light"]
 
 		this.maxHealth = 0
 		this.health = 0
@@ -515,10 +529,36 @@ class VehicleObject extends InterpolatedGameObject
 		AllVehicles[this.id] = this
 	}
 
+	getTeamColor3d() {
+		if (SelectedVehicle == this.id)
+			return renderer3d.white;
+		else if (this.id in SquadVehicles)
+			return renderer3d.green;
+		else
+			return this.team == 1 ? renderer3d.red : renderer3d.blue;
+	}
+
+	initializeGraphics() {
+		this.ns_mapImage = coloredIcons["mini_shp_light"];
+		this.ns_geomName = "";
+		this.ns_menuImage = null;
+
+		if (this.name in vehicleData) {
+			const data = vehicleData[this.name]
+			this.ns_mapImage = coloredIcons[data.MiniMapIcon] //Map Image is a must
+			if (data.MenuIcon != "")
+				this.ns_menuImage = icons[data.MenuIcon] //Menuimage is optional
+			this.ns_geomName = data.MiniMapIcon;
+		}
+		else
+			console.log("Parser: Vehicle Name not in dictionary: " + this.name)
+			
+    }
 
 	onLoadState() {
 		super.onLoadState();
 		this.ns_healthRenderer = new HealthRenderer(this);
+		this.initializeGraphics();
 	}
 }
 
@@ -551,16 +591,7 @@ function VehicleAdd(FullMessage)
 	CurrentVehicle.isClimbingVehicle = isClimbingVehicle(CurrentVehicle.name)
 	if (!CurrentVehicle.isClimbingVehicle)
 	{
-		if (CurrentVehicle.name in vehicleData)
-		{
-			const data = vehicleData[CurrentVehicle.name]
-			CurrentVehicle.mapImageName = data.MiniMapIcon;
-			CurrentVehicle.mapImage = coloredIcons[data.MiniMapIcon] //Map Image is a must
-			if (data.MenuIcon != "")
-				CurrentVehicle.menuImage = icons[data.MenuIcon] //Menuimage is optional
-		}
-		else
-			console.log("Parser: Vehicle Name not in dictionary: " + CurrentVehicle.name)
+		CurrentVehicle.initializeGraphics();
 	}
 
 	CurrentVehicle.isFlyingVehicle = isFlyingVehicle(CurrentVehicle.name)
@@ -903,7 +934,12 @@ class ProjObject extends InterpolatedGameObject
 		this.ns_shouldRotate = ProjectileTypeShouldRotate[this.type]
 		this.ns_isFast = false
 	}
-
+	getTeamColor3d() {
+		const p = this.player;
+		if (p == null)
+			return super.getTeamColor3d();
+		return p.getTeamColor3d();
+	}
 	onLoadState() {
 		super.onLoadState();
 		this.initializeNoState();
@@ -1855,8 +1891,9 @@ function loadList(Source, Target)
 	{
 		if (field in Target)
 			shallowCopy(Source[field], Target[field])
-		else
-			Target[field] = shallowCopy(Source[field])
+		else 
+			Target[field] = shallowCopy(Source[field]);
+			
 
 		Target[field].onLoadState()
 	}

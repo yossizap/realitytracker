@@ -19,7 +19,7 @@ $(function ()
 			thisImg.completedPercentage = parseInt((e.loaded / e.total) * 100);
 
 			//Images using "load" instead of "src" must have onprogress set!
-			thisImg.onprogress()
+			thisImg.onprogress(e)
 		};
 		xmlHTTP.onloadstart = function ()
 		{

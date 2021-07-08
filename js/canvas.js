@@ -141,14 +141,52 @@ var renderer2d;
 class Renderer2d {
 
 	cameraPos = vec2.create();
+
+	mouseClick(pos) {
+		var initialdis = MinDistanceSquared * CameraZoom
+		var minDis = initialdis
+		var objectToSelect = null
+		for (var I in AllPlayers) {
+			var p = AllPlayers[I]
+			const x = p.getX();
+			const z = p.getZ();
+			if (p.isJoining)
+				continue
+
+			var dis = Math.pow(XtoCanvas(x) - pos.X, 2) + Math.pow(YtoCanvas(z) - pos.Y, 2)
+			if (dis < minDis) {
+				objectToSelect = p
+				minDis = dis
+			}
+		}
+		for (var I in AllProj) {
+			const p = AllProj[I]
+			const x = p.getX();
+			const z = p.getZ();
+			var dis = (Math.pow(XtoCanvas(x) - pos.X, 2) + Math.pow(YtoCanvas(z) - pos.Y, 2)) * 2 // less click priority than players
+			if (dis < minDis) {
+				objectToSelect = p
+				minDis = dis
+			}
+		}
+
+		return objectToSelect;
+	}
+
+	getMousePos(event) {
+		var rect = Canvas.getBoundingClientRect()
+
+		return {
+			X: (event.clientX - rect.left) / options_canvasScale,
+			Y: (event.clientY - rect.top) / options_canvasScale
+	};
+}
+
 	update(frameTime) {
 
     }
 
 	draw() {
-		if (!MapImageReady)
-			return
-
 		var gametime = (Tick_Current + interpolation_CurrentAmount) * DemoTimePerTick;
 		gametimepassed = Math.max(0, (gametime - (isNaN(gametimelasttime) ? gametime : gametimelasttime)));
 		gametimelasttime = gametime;
@@ -160,11 +198,13 @@ class Renderer2d {
 
 		//Clear canvas, reapply new background
 		Context.clearRect(0, 0, Canvas.width, Canvas.height);
-		if (options_DrawDOD)
-			Context.drawImage(MapImageWithCombatArea, CameraX, CameraY, MapImageDrawSize, MapImageDrawSize)
-		else
-			Context.drawImage(MapImage, CameraX, CameraY, MapImageDrawSize, MapImageDrawSize)
 
+		if (MapImage != null) {
+			if (options_DrawDOD)
+				Context.drawImage(MapImageWithCombatArea, CameraX, CameraY, MapImageDrawSize, MapImageDrawSize)
+			else
+				Context.drawImage(MapImage, CameraX, CameraY, MapImageDrawSize, MapImageDrawSize)
+        }
 
 
 		//Draw Flags
@@ -721,7 +761,7 @@ function drawVehicle(i)
 	Context.translate(x, y)
 	if (!v.isUAVVehicle)
 		Context.rotate(rot / 180 * Math.PI)
-	Context.drawImage(v.mapImage[color], -11, -11, 22, 22)
+	Context.drawImage(v.ns_mapImage[color], -11, -11, 22, 22)
 	Context.restore()
 
 	if (v.isFlyingVehicle && options_DrawVehicleHeight)

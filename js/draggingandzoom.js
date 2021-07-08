@@ -31,15 +31,7 @@ var MouseDownCameraY
 var MouseIsDown = false
 
 
-function GetMousePos(event)
-{
-	var rect = Canvas.getBoundingClientRect()
 
-	return {
-		X: (event.clientX - rect.left) / options_canvasScale,
-		Y: (event.clientY - rect.top) / options_canvasScale
-	};
-}
 
 function MouseDown(event)
 {
@@ -52,7 +44,7 @@ function MouseDown(event)
 	//stop zooming
 	if (ZoomAnimation.instance != null)
 		ZoomAnimation.instance.delete();
-	var pos = GetMousePos(event)
+	var pos = activeRenderer.getMousePos(event)
 	MouseDownPosX = pos.X
 	MouseDownPosY = pos.Y
 	MouseLastPosX = pos.X;
@@ -68,7 +60,7 @@ function MouseMove(event)
 	if (MouseIsDown)
 	{
 		event.preventDefault();
-		var pos = GetMousePos(event)
+		var pos = activeRenderer.getMousePos(event)
 
 		if (is3DMode) {
 			renderer3d.mouseMove(pos.X - MouseLastPosX, pos.Y - MouseLastPosY);
@@ -106,49 +98,19 @@ function MouseClick(event)
 	if (event.button != 0)
 		return
 
-	var pos = GetMousePos(event)
+	var pos = activeRenderer.getMousePos(event)
 
 	// <!-- if mouse was dragged, do not deselect or select. -->
 	if (Math.pow(MouseDownPosX - pos.X, 2) + Math.pow(MouseDownPosY - pos.Y, 2) > 45)
 		return
-	
-	
-	var initialdis = MinDistanceSquared * CameraZoom
-	var minDis = initialdis
-	var objectToSelect = null
-	for (var I in AllPlayers)
-	{
-		var p = AllPlayers[I]
-		const x = p.getX();
-		const z = p.getZ();
-		if (p.isJoining)
-			continue
-		
-		var dis = Math.pow(XtoCanvas(x) - pos.X, 2) + Math.pow(YtoCanvas(z) - pos.Y, 2)
-		if (dis < minDis)
-		{
-			objectToSelect = p
-			minDis = dis
-		}
-	}
-	for (var I in AllProj)
-	{
-		const p = AllProj[I]
-		const x = p.getX();
-		const z = p.getZ();
-		var dis = (Math.pow(XtoCanvas(x) - pos.X, 2) + Math.pow(YtoCanvas(z) - pos.Y, 2)) * 2 // less click priority than players
-		if (dis < minDis)
-		{
-			objectToSelect = p
-			minDis = dis
-		}
-	}
-	
+
+	const objectToSelect = activeRenderer.mouseClick(pos);
+
 	// Didn't click on anything, deselect
 	if (objectToSelect == null) {
 		selection_SelectPlayer(SELECTED_NOTHING)
 	}
-	
+
 	if (doubleClickTimer == null) {
 		doubleclick_StartTimer()
 		handleSingleClick(objectToSelect)
@@ -158,6 +120,7 @@ function MouseClick(event)
 	}
 
 	requestUpdate();
+
 }
 
 function handleSingleClick(objectClicked) {
@@ -190,9 +153,9 @@ function Wheel(event)
 		return;
 
 	if (event.deltaY < 0)
-		new ZoomAnimation(GetMousePos(event), 1.05)
+		new ZoomAnimation(activeRenderer.getMousePos(event), 1.05)
 	else
-		new ZoomAnimation(GetMousePos(event), 0.95)
+		new ZoomAnimation(activeRenderer.getMousePos(event), 0.95)
 }
 
 // -- Zoom animation system
