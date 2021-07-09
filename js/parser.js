@@ -237,8 +237,11 @@ class PlayerObject extends InterpolatedGameObject
 			var KitSubName = this.kit.split("_")[1]
 			if (KitSubName in KitNameToImageDictionary && KitNameToImageDictionary[KitSubName] in icons)
 				this.ns_kitImage = icons[KitNameToImageDictionary[KitSubName]]
-			else
+			else {
+				this.ns_kitImage = icons[KitNameToImageDictionary["rifleman"]]
 				console.log("Parser: unknown kit name " + this.kit)
+            }
+				
 		}
 	}
 	getTeamColor3d() {

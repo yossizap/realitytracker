@@ -9,6 +9,7 @@ class GeometryRenderer extends Initializable {
 
     gpu_attribute_vertices = null;
     gpu_attribute_normals = null;
+    gpu_attribute_nodeid = null;
 
     gpu_uniform_tintColor = null; 
     gpu_uniform_projectionMatrix = null;
@@ -50,20 +51,22 @@ class GeometryRenderer extends Initializable {
         const vsSource = `
             attribute vec3 aVertexPosition;
             attribute vec3 aVertexNormal;
+            attribute float nodeid;
 
-            uniform mat4 uModelMatrix;
+            uniform mat4 uModelMatrix[20];
             uniform mat4 uViewMatrix;
             uniform mat4 uProjectionMatrix;
 
             varying highp vec3 vNormal;
 
             void main() {      
-                
+                int id = int(nodeid);
+ 
             // Position
-              gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * vec4(aVertexPosition, 1.0);
+              gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix[id] * vec4(aVertexPosition, 1.0);
 
             // Lightning
-              vNormal = normalize(mat3(uModelMatrix) * aVertexNormal);
+              vNormal = normalize(mat3(uModelMatrix[id]) * aVertexNormal);
             }
           `;
         const fsSource = `
@@ -100,6 +103,7 @@ class GeometryRenderer extends Initializable {
 
         this.gpu_attribute_vertices = gl.getAttribLocation(prog, 'aVertexPosition');
         this.gpu_attribute_normals = gl.getAttribLocation(prog, 'aVertexNormal');
+        this.gpu_attribute_nodeid = gl.getAttribLocation(prog, 'nodeid');
         
         this.gpu_uniform_tintColor = gl.getUniformLocation(prog, 'uColor');
         this.gpu_uniform_projectionMatrix = gl.getUniformLocation(prog, 'uProjectionMatrix');
@@ -170,7 +174,7 @@ class GeometryRenderer extends Initializable {
         for (var i in AllVehicles)
             this.drawVehicle(i);
 
-        this.getCreateGeometry("us_jet_f15").draw(this.testGeomPos, 0, vec3.set(vec3.create(), 0, 1, 0.5));
+        //this.getCreateGeometry("us_jet_f15").draw(this.testGeomPos, 0, vec3.set(vec3.create(), 0, 1, 0.5));
 
     }
 }
@@ -227,11 +231,23 @@ class Geometry {
         m[14] = pos[2];
         mat4.rotateY(m, m, -rot + Math.PI);
 
+
+        const ma = new Float32Array(20 * 16);
+        for (let i = 0; i < 20; i++) {
+            const offset = i * 16;
+            for (let j = 0; j < 16; j++) {
+                ma[offset + j] = m[j];
+            }
+            m[13] += 5;
+        }
+
         // Model matrix
         gl.uniformMatrix4fv(
             geometryRenderer.gpu_uniform_modelMatrix,
             false,
-            m);
+            ma);
+  
+
 
         // Color
         gl.uniform3fv(geometryRenderer.gpu_uniform_tintColor, color);
@@ -239,11 +255,15 @@ class Geometry {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.gpu_buffer_vertices);
         const vertexAttribute = geometryRenderer.gpu_attribute_vertices;
         const normalsAttribute = geometryRenderer.gpu_attribute_normals;
+        const nodeidAttribute = geometryRenderer.gpu_attribute_nodeid;
         gl.vertexAttribPointer(vertexAttribute, 3, gl.FLOAT, false, 16, 0);
         gl.enableVertexAttribArray(vertexAttribute);
 
         gl.vertexAttribPointer(normalsAttribute, 3, gl.BYTE, true, 16, 12);
         gl.enableVertexAttribArray(normalsAttribute);
+
+        gl.vertexAttribPointer(nodeidAttribute, 1, gl.BYTE, false, 16, 15);
+        gl.enableVertexAttribArray(nodeidAttribute);
 
         for (let i = 0; i < this.data.draws.length; i++) {
             const draw = this.data.draws[i];
