@@ -208,14 +208,15 @@ class Geometry {
             this.gpu_buffer_indices.push(buf);
 
             const indexview = new DataView(geometryRenderer.testIndices, data.indicesOffset + draw.istart * 2, draw.inum * 2);
-            const int32indices = new ArrayBuffer(draw.inum * 4)
-            const int32IndicesView = new DataView(int32indices);
+
             for (let j = 0; j < draw.inum; j++) {
-                int32IndicesView.setUint32(j * 4, indexview.getUint16(j * 2, true) + draw.vstart, true)
+                indexview.setUint16(j * 2,
+                    indexview.getUint16(j * 2, true) + draw.vstart
+                    , true)
             }
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buf);
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, int32IndicesView, gl.STATIC_DRAW, 0);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indexview, gl.STATIC_DRAW, 0);
         }
 
     }
@@ -235,9 +236,7 @@ class Geometry {
         const ma = new Float32Array(20 * 16);
         for (let i = 0; i < 20; i++) {
             const offset = i * 16;
-            for (let j = 0; j < 16; j++) {
-                ma[offset + j] = m[j];
-            }
+            ma.set(m, offset);
             m[13] += 5;
         }
 
@@ -268,7 +267,7 @@ class Geometry {
         for (let i = 0; i < this.data.draws.length; i++) {
             const draw = this.data.draws[i];
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.gpu_buffer_indices[i]);
-            gl.drawElements(gl.TRIANGLES, draw.inum, gl.UNSIGNED_INT, 0);
+            gl.drawElements(gl.TRIANGLES, draw.inum, gl.UNSIGNED_SHORT, 0);
         }
 
     }
