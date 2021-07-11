@@ -82,10 +82,11 @@ function requestUpdate() {
 
 
 function update() {
+	updateRequested = false;
 	if (!loadingComplete)
 		return;
 
-	updateRequested = false;
+
 	const now = performance.now();
 	if (lastUpdateTime == null)
 		lastUpdateTime = now - 10;
