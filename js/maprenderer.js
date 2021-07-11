@@ -13,6 +13,7 @@ class MapRenderer {
 
     mapname = ""
 
+    shouldUseFallback = true;
 
     init() {
         this.segments = [];
@@ -38,10 +39,23 @@ class MapRenderer {
         this._downloadSegment(0, 1, 1);
     }
 
+    drawOld(ctx) {
+        // old Fallback
+        if (MapImage != null) {
+            if (options_DrawDOD)
+                Context.drawImage(MapImageWithCombatArea, CameraX, CameraY, MapImageDrawSize, MapImageDrawSize)
+            else
+                Context.drawImage(MapImage, CameraX, CameraY, MapImageDrawSize, MapImageDrawSize)
+        }
+    }
 
 
     // Decide on zoom level and segments
     draw(ctx) {
+        if (this.shouldUseFallback)
+            return this.drawOld(ctx);
+        
+
         // zoom level (0 based where Zoom level 0 is 2x2)
         const zoomlevel = this._decideZoomlevel();
         // Amount of segments in current zoom level (0 is 2 segments, 1 is 4 segments)
@@ -81,8 +95,10 @@ class MapRenderer {
         
         downloadManager.download(URL, "image", (data) => {
             this.segments[zoom][x][y] = data;
+            this.shouldUseFallback = false;
             requestUpdate();
-        }, "Map segment");
+            },
+            "Map segment");
     }
 
   

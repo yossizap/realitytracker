@@ -25,13 +25,14 @@ class DownloadManager {
 
 
 
-    download(link, type, callback, name) {
+    download(link, type, callback, name, onError) {
         console.log("Downloading " + link);
         const typelow = type.toLowerCase();
         const d = {
             link: link,
             type: typelow,
             callback: callback,
+            callbackError: onError,
             name: name,
             done: false,
             totalsize: null,
@@ -60,7 +61,7 @@ class DownloadManager {
                     d.donesize = e.loaded;
                     this.onDownloadProgress(d);
                 });
-                req.onerror = () => { this.onDownloadError(d); };
+                req.onerror = (() => { this.onDownloadError(d); });
                 req.send();
                 break;
             case "image":
@@ -74,7 +75,7 @@ class DownloadManager {
                     d.donesize = e.loaded;
                     this.onDownloadProgress(d);
                 });
-                img.onerror = () => { this.onDownloadError(d); };
+                img.onerror = (() => { this.onDownloadError(d); });
                 img.load(link);
                 break;
             default:
@@ -110,7 +111,11 @@ class DownloadManager {
         this.cleanDownload(d);        
     }
     onDownloadError(d) {
+        console.log("Error downloading", d)
         d.row.cells[1].innerText = "Error";
+        if (d.callbackError != null) {
+            d.callbackError(d);
+        }
     }
 
     cleanDownload(d) {
