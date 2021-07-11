@@ -82,6 +82,9 @@ function requestUpdate() {
 
 
 function update() {
+	if (!loadingComplete)
+		return;
+
 	updateRequested = false;
 	const now = performance.now();
 	if (lastUpdateTime == null)
@@ -106,7 +109,6 @@ function update() {
 
 }
 
-// Called every timer fire, 60fps currently
 function updateLogic(frameTime)
 {
 	if (!isPlaying)

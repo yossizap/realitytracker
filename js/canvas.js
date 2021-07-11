@@ -199,12 +199,7 @@ class Renderer2d {
 		//Clear canvas, reapply new background
 		Context.clearRect(0, 0, Canvas.width, Canvas.height);
 
-		if (MapImage != null) {
-			if (options_DrawDOD)
-				Context.drawImage(MapImageWithCombatArea, CameraX, CameraY, MapImageDrawSize, MapImageDrawSize)
-			else
-				Context.drawImage(MapImage, CameraX, CameraY, MapImageDrawSize, MapImageDrawSize)
-        }
+		mapRenderer.draw(Context);
 
 
 		//Draw Flags

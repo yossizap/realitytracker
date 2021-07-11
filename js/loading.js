@@ -322,21 +322,44 @@ function loadDemo(link, CredsNeeded)
 
 
 
+function handleFileDrop(ev) {
+	if (loadingComplete)
+		return;
+
+	ev.preventDefault();
+	if (ev.dataTransfer.items) {
+		if (ev.dataTransfer.items[0].kind === 'file') {
+			const file = ev.dataTransfer.items[0].getAsFile();
+			loadDemoFromFileObject(file);
+		}
+	
+	}
+	else {
+		loadDemoFromFileObject(file);
+	}
+}
+$(() => {
+	document.addEventListener("drop", handleFileDrop);
+	document.addEventListener("dragover", (ev) => ev.preventDefault());
+});
+
 //Load demo from selected file
 function loadDemoFromFile()
 {
+	loadDemoFromFileObject($("#demoFileSelection")[0].files[0]);
+}
+
+function loadDemoFromFileObject(file) {
 	var reader = new FileReader()
-	reader.onloadend = () =>
-	{
+	reader.onloadend = () => {
 		DataBuffer = checkIfGZAndInflate(reader.result)
 		messageArrayObject.updateNewMessages()
 		stage3LoadingFininshed()
 	}
-	reader.readAsArrayBuffer($("#demoFileSelection")[0].files[0])
+	reader.readAsArrayBuffer(file)
 
 	$("#copyLink")[0].style["cursor"] = "not-allowed";
 }
-
 
 
 var isParsingDone = false
@@ -429,6 +452,7 @@ function stage3LoadingFininshed()
 		requestUpdate();
 	}, "Map image");
 
+	mapRenderer.init();
 
 
 	// Load this map's heightmap raw and configuration
@@ -479,7 +503,7 @@ function ParseDemo_End()
 }
 
 
-
+var loadingComplete = false;
 //called when demo parsing stage finishes
 function stage4LoadingFininshed()
 {
@@ -502,11 +526,7 @@ function stage4LoadingFininshed()
 	//Load options from localStorage
 	loadSettings()
 	
-	//Draw the canvas for the first time
-	requestUpdate();
 
-	// Chrome hack: draw again a second later, its doing some async caching and images are not ready
-	setTimeout(requestUpdate, 300);
 	
 	//Reset speed to 1
 	setSpeed(1)
@@ -526,8 +546,15 @@ function stage4LoadingFininshed()
 			setCanvasCenterWithZoom(cx, cy, isNaN(czoom) ? 1 : czoom / options_canvasScale);
 	} else {
 		setCanvasCenterWithZoom(0, 0, 1);
-    }
+	}
 
+	//Draw the canvas for the first time
+	requestUpdate();
+
+	// Chrome hack: draw again a second later, its doing some async caching and images are not ready
+	setTimeout(requestUpdate, 300);
+
+	loadingComplete = true;
 }
 
 function writeServerInfoTable()
