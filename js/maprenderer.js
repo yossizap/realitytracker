@@ -15,10 +15,34 @@ class MapRenderer {
 
     shouldUseFallback = true;
 
+    mapsNamesJson = null;
+
+    constructor() {
+
+        downloadManager.download(`https://www.realitymod.com/mapgallery/json/levels.json`, "json", (data) =>
+        {
+            this.mapsNamesJson = data;
+        },
+            "Map info json");
+        
+
+    }
+
     init() {
         this.segments = [];
         this.fullSize = MapSize * 1024;
-        this.mapname = MapName.replaceAll("_", "");
+        try {
+            this.mapname = this.mapsNamesJson
+                .find((obj) => obj.Key.toLowerCase() == MapName.toLowerCase())
+                .Name
+                .replaceAll(" ", "")
+                .replaceAll("_", "")
+                .toLowerCase();
+        } catch (e) {
+            this.mapname = null;
+        }
+
+
 
         for (let i = 0; i < this.getMaxZoomCount(); i++) {
             const zoomLevel = []
@@ -70,8 +94,8 @@ class MapRenderer {
         const miny = clamp(0, Math.floor(-CameraY / renderSize), segmentCount - 1);
 
         // Not including
-        const maxx = clamp(0, Math.floor((-CameraX + Canvas.width) / renderSize) + 1, segmentCount);
-        const maxy = clamp(0, Math.floor((-CameraY + Canvas.height) / renderSize) + 1, segmentCount);
+        const maxx = clamp(0, Math.floor((-CameraX + Canvas.width / options_canvasScale) / renderSize) + 1, segmentCount);
+        const maxy = clamp(0, Math.floor((-CameraY + Canvas.height / options_canvasScale) / renderSize) + 1, segmentCount);
 
 
         for (let x = minx; x < maxx; x++)
@@ -90,6 +114,9 @@ class MapRenderer {
 
     // No checks - only call when needed
     _downloadSegment(zoom, x, y) {
+        if (this.mapname == null)
+            return;
+
         this.segments[zoom][x][y] = MAPRENDERER_SEGMENT_DOWNLOADING;
         const URL = `https://www.realitymod.com/mapgallery/images/maps/${this.mapname}/tiles/${zoom + 1}/${x}/${y}.jpg`;
         
@@ -105,7 +132,7 @@ class MapRenderer {
 
     _decideZoomlevel() {
         const actualZoom = CameraZoom * options_canvasScale;     
-        return clamp(0, Math.floor(Math.log2(actualZoom * 1.5)), this.getMaxZoomCount() - 1);
+        return clamp(0, Math.floor(Math.log2(actualZoom * 1.2)), this.getMaxZoomCount() - 1);
     }
 
 

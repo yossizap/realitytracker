@@ -187,6 +187,7 @@ class Geometry {
     gpu_buffer_vertices = null;
     gpu_buffer_indices = [];
     data = null;
+    
 
     constructor(name) {
         const gl = renderer3d.gl;
@@ -274,4 +275,64 @@ class Geometry {
 
 }
 
+
+let con_templates = {};
+function getCreateTemplate(name) {
+    if (!(name in templates)) {
+        con_templates[name] = {
+            templateName: name,
+            children: [],
+            geometryPart: null,
+        }
+    }
+    return con_templates[name];
+}
+
+function parseConChildren(lines) {
+    let active = null;
+    let activeChildInfo = null;
+
+
+    const confile_commands =
+        [
+            [new RegExp('objectTemplate\.create \S* (?<templateName>\S*)/gi'), (match) => {
+                active = getCreateTemplate(match.templateName.toLowerCase());
+            }],
+            [new RegExp('objectTemplate\.geometryPart (?<geometryPart>\S*)/gi'), (match) => {
+                active.geometryPart = Number(match.geometryPart);
+            }],
+
+            [new RegExp('objectTemplate\.addTemplate (?<templateName>\S*)/gi'), (match) => {
+                let template = getCreateTemplate(match.templateName.toLowerCase());
+                let childInfo = [template, vec3.create(), vec3.create()]
+                active.children.push(childInfo);
+                activeChildInfo = childInfo;
+            }],
+
+            [new RegExp('objectTemplate\.setPosition (?<x>\S*)\/(?<y>\S*)\/(?<z>\S*)/gi'), (match) => {
+                activeChildInfo[1][0] = match.x;
+                activeChildInfo[1][1] = match.y;
+                activeChildInfo[1][2] = match.z;
+            }],
+
+            [new RegExp('objectTemplate\.setRotation (?<x>\S*)\/(?<y>\S*)\/(?<z>\S*)/gi'), (match) => {
+                activeChildInfo[2][0] = match.x;
+                activeChildInfo[2][1] = match.y;
+                activeChildInfo[2][2] = match.z;
+            }],
+        ]
+
+    for (let line of lines) {
+        for (let commandHandler of confile_commands) {
+            const command = commandHandler[0];
+            const handler = commandHandler[1];
+
+            const match = command.exec(line)
+            if (match != null) {
+                handler(match);
+                break;
+            }
+        }
+    }
+}
 $(() => { geometryRenderer = new GeometryRenderer(); })

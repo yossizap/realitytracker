@@ -17,7 +17,7 @@ class DownloadManager {
             width: 350,
             height: 160,
             resizable: false,
-            position: { my: "left center", at: "left center", of: window },
+            position: { my: "left bottom", at: "left top", of: "#startPauseButton"},
             draggable: false,
             autoOpen: false,
         });
