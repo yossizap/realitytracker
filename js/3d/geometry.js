@@ -21,29 +21,14 @@ class GeometryRenderer extends Initializable {
 
     testGeomPos = vec3.create();
 
+    dataReady = true;
+
     constructor() {
         super();
-
-        downloadManager.download("indices.rawi", "bin", ((data) => {
-            this.testIndices = data;
-            this._updateIsDataReady();
-        }), "Geometry Indices");
-
-
-        downloadManager.download("vertices.rawv", "bin", ((data) => {
-            this.testVertices = data;
-            this._updateIsDataReady();
-        }), "Geometry Vertices");
-
-
-        downloadManager.download("geomdata.json", "json", ((data) => {
-            this.geomdata = data;
-            this._updateIsDataReady();
-        }), "Geometry Data");
     }
 
-    _updateIsDataReady() {
-        this.dataReady = (this.geomdata != null && this.testIndices != null && this.testVertices != null)
+    _downloadsComplete() {
+        return (this.geomdata != null && this.testIndices != null && this.testVertices != null)
     }
 
     init() {
@@ -53,7 +38,7 @@ class GeometryRenderer extends Initializable {
             attribute vec3 aVertexNormal;
             attribute float nodeid;
 
-            uniform mat4 uModelMatrix[20];
+            uniform mat4 uModelMatrix[30];
             uniform mat4 uViewMatrix;
             uniform mat4 uProjectionMatrix;
 
@@ -77,7 +62,7 @@ class GeometryRenderer extends Initializable {
             
             void main() {            
               highp float strength = max(dot(vNormal,  vec3(0.577, 0.577, 0.577)), 0.0);
-              highp vec3 lightning = vec3(0.3, 0.3, 0.3) + (vec3(0.7, 0.7, 0.7) * strength);        
+              highp vec3 lightning = vec3(0.05, 0.05, 0.05) + (vec3(0.95, 0.95, 0.95) * strength);        
 
               gl_FragColor.rgb = uColor.rgb * lightning;
               gl_FragColor.a = 1.0;
@@ -110,6 +95,20 @@ class GeometryRenderer extends Initializable {
         this.gpu_uniform_viewMatrix = gl.getUniformLocation(prog, 'uViewMatrix');
         this.gpu_uniform_modelMatrix = gl.getUniformLocation(prog, 'uModelMatrix');
 
+        downloadManager.download("indices.rawi", "bin", ((data) => {
+            this.testIndices = data;
+        }), "Geometry Indices");
+
+
+        downloadManager.download("vertices.rawv", "bin", ((data) => {
+            this.testVertices = data;
+        }), "Geometry Vertices");
+
+
+        downloadManager.download("geomdata.json", "json", ((data) => {
+            this.geomdata = data;
+        }), "Geometry Data");
+
         this.initialized = true;
     }
 
@@ -131,30 +130,17 @@ class GeometryRenderer extends Initializable {
         if (!this.initialized)
             return null;
 
-        let geomname;
-        // tmp
-        if (name.includes("_the_mv22"))
-            geomname = "us_the_mv22";
-        else if (name.includes("_the_"))
-            geomname = "us_the_uh1c";
-        else if (name.includes("_jep_"))
-            geomname = "us_jep_hmmwv";
-        else if (name.includes("_jet_"))
-            geomname = "us_jet_f15";
-        else if (name.includes("_trk_"))
-            geomname = "ru_trk_logistics";
-        else if (name.includes("apc") || name.includes("ifv"))
-            geomname = "ru_apc_btr80a";
-        else if (name.includes("_tnk_"))
-            geomname = "us_tnk_m1a2"
-        else
-            geomname = "us_jep_hmmwv";
-        /////
+        if (!this._downloadsComplete())
+            return null;
+       
+        if (!(name in this.geometries)) {
+            if (!(name in this.geomdata))
+                return null;
 
-
-        if (!(geomname in this.geometries))
-            this.geometries[geomname] = new Geometry(geomname);
-        return this.geometries[geomname];
+            this.geometries[name] = new Geometry(name);
+        }
+            
+        return this.geometries[name];
 
     }
 
@@ -173,8 +159,6 @@ class GeometryRenderer extends Initializable {
 
         for (var i in AllVehicles)
             this.drawVehicle(i);
-
-        //this.getCreateGeometry("us_jet_f15").draw(this.testGeomPos, 0, vec3.set(vec3.create(), 0, 1, 0.5));
 
     }
 }
@@ -234,8 +218,8 @@ class Geometry {
         mat4.rotateY(m, m, -rot + Math.PI);
 
 
-        const ma = new Float32Array(20 * 16);
-        for (let i = 0; i < 20; i++) {
+        const ma = new Float32Array(30 * 16);
+        for (let i = 0; i < 30; i++) {
             const offset = i * 16;
             ma.set(m, offset);
             m[13] += 5;

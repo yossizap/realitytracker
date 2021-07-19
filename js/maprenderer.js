@@ -101,21 +101,23 @@ class MapRenderer {
         for (let x = minx; x < maxx; x++)
             for (let y = miny; y < maxy; y++) {
                 const img = this.segments[zoomlevel][x][y];
-                if (img === MAPRENDERER_SEGMENT_DOWNLOADING)
+                if (img === MAPRENDERER_SEGMENT_DOWNLOADING) {
                     continue;
+                }
+
                 if (img === undefined) {
                     this._downloadSegment(zoomlevel, x, y);
                     continue;
                 }
                 ctx.drawImage(img, CameraX + x * renderSize, CameraY + y * renderSize, renderSize, renderSize);
-            }
-        
-     }
+            } 
+    }
 
     // No checks - only call when needed
     _downloadSegment(zoom, x, y) {
         if (this.mapname == null)
             return;
+
 
         this.segments[zoom][x][y] = MAPRENDERER_SEGMENT_DOWNLOADING;
         const URL = `https://www.realitymod.com/mapgallery/images/maps/${this.mapname}/tiles/${zoom + 1}/${x}/${y}.jpg`;
@@ -132,7 +134,7 @@ class MapRenderer {
 
     _decideZoomlevel() {
         const actualZoom = CameraZoom * options_canvasScale;     
-        return clamp(0, Math.floor(Math.log2(actualZoom * 1.2)), this.getMaxZoomCount() - 1);
+        return clamp(0, Math.floor(Math.log2(actualZoom * 0.8)), this.getMaxZoomCount() - 1);
     }
 
 

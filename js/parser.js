@@ -551,7 +551,7 @@ class VehicleObject extends InterpolatedGameObject
 			this.ns_mapImage = coloredIcons[data.MiniMapIcon] //Map Image is a must
 			if (data.MenuIcon != "")
 				this.ns_menuImage = icons[data.MenuIcon] //Menuimage is optional
-			this.ns_geomName = data.MiniMapIcon;
+			this.ns_geomName = data.Geometry;
 		}
 		else
 			console.log("Parser: Vehicle Name not in dictionary: " + this.name)

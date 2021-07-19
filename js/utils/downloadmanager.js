@@ -1,5 +1,7 @@
 "use strict";
 
+const SHOW_DELAY = 3000
+
 var downloadManager;
 class DownloadManager {
 
@@ -21,6 +23,7 @@ class DownloadManager {
             draggable: false,
             autoOpen: false,
         });
+        setInterval(() => this.updateShow(), 1250);
     }
 
 
@@ -39,6 +42,7 @@ class DownloadManager {
             donesize: null,
             content: null,
             row: null,
+            startTime: Date.now()
         }
 
         switch (typelow) {
@@ -96,7 +100,8 @@ class DownloadManager {
         else
             c0.innerText = d.link;
         c1.innerText = "Connecting....";
-        $("#downloads").dialog("open");
+
+        this.updateShow();
     }
 
     onDownloadProgress(d) {
@@ -108,7 +113,7 @@ class DownloadManager {
     onDownloadComplete(d) {
         d.done = true;
         d.callback(d.content);
-        this.cleanDownload(d);        
+        this.cleanDownload(d);      
     }
     onDownloadError(d) {
         console.log("Error downloading", d)
@@ -116,6 +121,8 @@ class DownloadManager {
         if (d.callbackError != null) {
             d.callbackError(d);
         }
+
+        this.updateShow();
     }
 
     cleanDownload(d) {
@@ -123,7 +130,14 @@ class DownloadManager {
         this.downloads.splice(id, 1);
         d.row.remove();
 
-        if (this.downloads.length == 0)
+        this.updateShow();
+    }
+
+    updateShow() {
+        const shouldShow = (this.downloads.find(download => (download.startTime) + SHOW_DELAY < Date.now()) != undefined)
+        if (shouldShow)
+            $("#downloads").dialog("open");
+        else
             $("#downloads").dialog("close");
     }
 
