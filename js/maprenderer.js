@@ -76,7 +76,7 @@ class MapRenderer {
 
     // Decide on zoom level and segments
     draw(ctx) {
-        if (this.shouldUseFallback)
+        if (this.shouldUseFallback || options_UseFallbackRenderer)
             return this.drawOld(ctx);
         
 
