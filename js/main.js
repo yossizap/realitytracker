@@ -41,6 +41,7 @@ var options_DrawVehicleHeight = true
 var options_health_players = true
 var options_health_vehicles = true
 var options_drawAllOrderIcons = false
+var options_UseFallbackRenderer = false
 	//}
 
 
