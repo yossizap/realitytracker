@@ -42,7 +42,8 @@ class DownloadManager {
             donesize: null,
             content: null,
             row: null,
-            startTime: Date.now()
+            startTime: Date.now(),
+			started: false
         }
 
         switch (typelow) {
@@ -63,6 +64,7 @@ class DownloadManager {
                 req.onprogress = ((e) => {
                     d.totalsize = e.total;
                     d.donesize = e.loaded;
+					d.started = true;
                     this.onDownloadProgress(d);
                 });
                 req.onerror = (() => { this.onDownloadError(d); });
@@ -77,6 +79,7 @@ class DownloadManager {
                 img.onprogress = ((e) => {
                     d.totalsize = e.total;
                     d.donesize = e.loaded;
+					d.started = true;
                     this.onDownloadProgress(d);
                 });
                 img.onerror = (() => { this.onDownloadError(d); });
@@ -134,7 +137,7 @@ class DownloadManager {
     }
 
     updateShow() {
-        const shouldShow = (this.downloads.find(download => (download.startTime) + SHOW_DELAY < Date.now()) != undefined)
+        const shouldShow = (this.downloads.find(download => (download.startTime) + SHOW_DELAY < Date.now() && download.started) != undefined)
         if (shouldShow)
             $("#downloads").dialog("open");
         else
