@@ -138,9 +138,9 @@ class DownloadManager {
 
     updateShow() {
         const shouldShow = (this.downloads.find(download => (download.startTime) + SHOW_DELAY < Date.now() && download.started) != undefined)
-        if (shouldShow)
-            $("#downloads").dialog("open");
-        else
+        // if (shouldShow)
+            // $("#downloads").dialog("open");
+        // else
             $("#downloads").dialog("close");
     }
 

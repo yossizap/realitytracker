@@ -76,7 +76,8 @@ class MapRenderer {
 
     // Decide on zoom level and segments
     draw(ctx) {
-        if (this.shouldUseFallback || options_UseFallbackRenderer)
+        if (this.shouldUseFallback || // We failed downloading from map gallery, use old method
+				(options_UseFallbackRenderer && MapImage != null)) // We selected the fallback renderer, but the fallback failed. Use new method.
             return this.drawOld(ctx);
         
 
