@@ -240,6 +240,8 @@ class PlayerObject extends InterpolatedGameObject
 			else {
 				this.ns_kitImage = icons[KitNameToImageDictionary["rifleman"]]
 				console.log("Parser: unknown kit name " + this.kit)
+				if (!this.ns_kitImage)
+					console.error("Parser: `rifleman` image in kitname-to-image dictionary must exist as fallback. Check the build script.")
             }
 				
 		}
