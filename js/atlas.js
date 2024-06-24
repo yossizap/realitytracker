@@ -11,7 +11,7 @@ function atlasLoaded()
 
 	// Draw the atlas on a temp canvas
 	var c = document.createElement('canvas');
-	c.width = 4096
+	c.width = 16384
 	c.height = 33
 	atlascontext = c.getContext("2d")
 	atlascontext.drawImage(atlasPNG, 0, 0)

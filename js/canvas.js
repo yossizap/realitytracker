@@ -756,7 +756,7 @@ function drawVehicle(i)
 	Context.translate(x, y)
 	if (!v.isUAVVehicle)
 		Context.rotate(rot / 180 * Math.PI)
-	Context.drawImage(v.ns_mapImage[color], -11, -11, 22, 22)
+	Context.drawImage(v.ns_mapImage[color], -16, -16, 32, 32)
 	Context.restore()
 
 	if (v.isFlyingVehicle && options_DrawVehicleHeight)
