@@ -63,14 +63,24 @@ function playerRow_Update(id)
 
 	row.cells[2].textContent = ""
 	if (p.kit != "")
-		row.cells[2].appendChild(p.ns_kitImage.cloneNode(false))
+	{
+		const imgNode = p.ns_kitImage.cloneNode(false);
+		imgNode.width = 16;imgNode.height = 16;
+		row.cells[2].appendChild(imgNode);
+	}
+		
 
 	row.cells[3].textContent = ""
 	if (p.vehicleid >= 0 && (p.vehicleid in AllVehicles))
 	{
 		var vobj = AllVehicles[p.vehicleid]
 		if (vobj.ns_menuImage != null)
-			row.cells[3].appendChild(vobj.ns_menuImage.cloneNode(false))
+		{
+			const icon = vobj.ns_menuImage.cloneNode(false);
+			icon.width = 16; icon.height = 16;
+			row.cells[3].appendChild(icon)
+		}
+
 	}
 }
 

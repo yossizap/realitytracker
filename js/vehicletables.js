@@ -36,7 +36,12 @@ function vehicleTable_Create(id)
 	cell.innerHTML = ""
 
 	if (v.team != 0 && v.ns_mapImage != null)
-		cell.appendChild(v.ns_mapImage[v.team - 1].cloneNode(false))
+	{
+		const icon = v.ns_mapImage[v.team - 1].cloneNode(false);
+		icon.width = 16; icon.height = 16;
+		cell.appendChild(icon)
+	}
+
 
 	// Try to find vehicle name in dictionary
 	if (v.name in vehicleData)
