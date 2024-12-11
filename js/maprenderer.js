@@ -19,7 +19,7 @@ class MapRenderer {
 
     constructor() {
 
-        downloadManager.download(`https://www.realitymod.com/mapgallery/json/levels.json`, "json", (data) =>
+        downloadManager.download(`https://mapgallery.realitymod.com/json/levels.json`, "json", (data) =>
         {
             this.mapsNamesJson = data;
         },
@@ -121,7 +121,7 @@ class MapRenderer {
 
 
         this.segments[zoom][x][y] = MAPRENDERER_SEGMENT_DOWNLOADING;
-        const URL = `https://www.realitymod.com/mapgallery/images/maps/${this.mapname}/tiles/${zoom + 1}/${x}/${y}.jpg`;
+        const URL = `https://mapgallery.realitymod.com/images/maps/${this.mapname}/tiles/${zoom + 1}/${x}/${y}.jpg`;
         
         downloadManager.download(URL, "image", (data) => {
             this.segments[zoom][x][y] = data;
